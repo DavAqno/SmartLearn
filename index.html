@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Study Workspace</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="appContainer">
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand">
+          <span class="brand-mark"></span>
+          <div class="brand-text">
+            <div class="brand-title">Study Workspace</div>
+            <div class="brand-subtitle">Notes & plans</div>
+          </div>
+        </div>
+        <button id="toggleSidebar" aria-label="Toggle sidebar">⇔</button>
+      </div>
+      <nav class="nav">
+        <button id="nav-notes" class="nav-btn active"><span class="nav-icon">N</span><span class="nav-label">Notes</span></button>
+        <button id="nav-sessions" class="nav-btn"><span class="nav-icon">S</span><span class="nav-label">Study Sessions</span></button>
+        <button id="nav-planner" class="nav-btn"><span class="nav-icon">P</span><span class="nav-label">Study Planner</span></button>
+        <button id="nav-search" class="nav-btn"><span class="nav-icon">G</span><span class="nav-label">Global Search</span></button>
+        <button id="nav-settings" class="nav-btn"><span class="nav-icon">St</span><span class="nav-label">Settings</span></button>
+      </nav>
+    </aside>
+
+    <main id="mainView">
+      <section id="section-notes" class="view-section">
+        <header class="section-header">
+          <div>
+            <h1>Notes</h1>
+            <p class="muted">Capture and update your study notes.</p>
+          </div>
+          <button id="newNoteBtn" class="primary-btn">+ New Note</button>
+        </header>
+        <div class="notes-layout">
+          <div class="notes-listing">
+            <div class="list-block">
+              <div class="block-header">Subjects</div>
+              <ul id="subjectList" class="list"></ul>
+            </div>
+            <div class="list-block">
+              <div class="block-header">Notes</div>
+              <ul id="noteList" class="list"></ul>
+            </div>
+          </div>
+          <div class="note-editor">
+            <div class="editor-meta">
+              <input type="text" id="noteTitle" class="doc-title" placeholder="Untitled note" />
+              <div class="meta-row">
+                <label for="noteSubject" class="inline">Subject</label>
+                <input type="text" id="noteSubject" placeholder="Subject" />
+              </div>
+              <div class="meta-info">
+                <span>Created <strong id="createdAt">—</strong></span>
+                <span>Updated <strong id="updatedAt">—</strong></span>
+              </div>
+            </div>
+            <textarea id="noteContent" class="doc-content" placeholder="Start typing your notes..."></textarea>
+            <div class="actions">
+              <button id="deleteNoteBtn" class="danger-btn">Delete Note</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-sessions" class="view-section" style="display: none;">
+        <header class="section-header">
+          <div>
+            <h1>Focused Study Sessions</h1>
+            <p class="muted">Track deliberate practice time.</p>
+          </div>
+        </header>
+        <div class="session-panel">
+          <div class="session-top">
+            <div class="field-group">
+              <label for="sessionSubject">Session subject</label>
+              <input type="text" id="sessionSubject" placeholder="Subject for this session" />
+            </div>
+            <div class="timer" id="sessionTimer">00:00:00</div>
+          </div>
+          <div class="session-actions">
+            <button id="startSessionBtn" class="secondary-btn">Start Session</button>
+            <button id="pauseSessionBtn" class="secondary-btn">Pause Session</button>
+            <button id="endSessionBtn" class="danger-btn">End Session</button>
+          </div>
+          <div class="session-history">
+            <div class="history-header">
+              <h3>Session history</h3>
+              <span class="muted">Recent focused work</span>
+            </div>
+            <ul id="sessionList" class="list compact"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-planner" class="view-section" style="display: none;">
+        <header class="section-header">
+          <div>
+            <h1>Offline Study Planner</h1>
+            <p class="muted">Organize upcoming study tasks.</p>
+          </div>
+          <button id="newPlanBtn" class="secondary-btn">Create New Study Plan</button>
+        </header>
+        <div class="planner-grid">
+          <div class="planner-controls">
+            <div class="field-group">
+              <label for="planFilterSubject">Subject</label>
+              <select id="planFilterSubject"></select>
+            </div>
+            <div class="field-group">
+              <label for="planFilterPriority">Priority</label>
+              <select id="planFilterPriority">
+                <option value="all">All</option>
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="field-group">
+              <label for="planFilterStatus">Status</label>
+              <select id="planFilterStatus">
+                <option value="all">All</option>
+                <option value="active">Active</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+          <div class="planner-form">
+            <div class="field-group">
+              <label for="planTitle">Title</label>
+              <input type="text" id="planTitle" placeholder="Plan title" />
+            </div>
+            <div class="field-group">
+              <label for="planSubject">Subject</label>
+              <input type="text" id="planSubject" placeholder="Subject area" />
+            </div>
+            <div class="field-group">
+              <label for="planDescription">Description</label>
+              <textarea id="planDescription" rows="3" placeholder="Brief description"></textarea>
+            </div>
+            <div class="planner-row">
+              <div class="field-group">
+                <label for="planDeadline">Deadline</label>
+                <input type="date" id="planDeadline" />
+              </div>
+              <div class="field-group">
+                <label for="planPriority">Priority</label>
+                <select id="planPriority">
+                  <option value="high">High</option>
+                  <option value="medium">Medium</option>
+                  <option value="low">Low</option>
+                </select>
+              </div>
+              <div class="field-group checkbox-group">
+                <label for="planCompleted">Completed</label>
+                <div class="checkbox-row">
+                  <input type="checkbox" id="planCompleted" />
+                  <span class="muted">Mark as done</span>
+                </div>
+              </div>
+            </div>
+            <div class="planner-actions">
+              <button id="savePlanBtn" class="primary-btn">Save Plan</button>
+              <button id="deletePlanBtn" class="danger-btn" type="button">Delete Plan</button>
+            </div>
+          </div>
+          <div class="planner-list">
+            <div class="history-header">
+              <h3>Study plans</h3>
+              <span class="muted">Sorted by deadlines</span>
+            </div>
+            <ul id="planList" class="list plan-list"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section id="section-search" class="view-section" style="display: none;">
+        <header class="section-header">
+          <div>
+            <h1>Global Knowledge Index</h1>
+            <p class="muted">Search notes, plans, and sessions.</p>
+          </div>
+        </header>
+        <div class="global-search">
+          <input type="search" id="globalSearch" placeholder="Search notes, plans, sessions..." />
+        </div>
+        <div id="searchResults" class="search-results"></div>
+      </section>
+
+      <section id="section-settings" class="view-section" style="display: none;">
+        <header class="section-header">
+          <div>
+            <h1>Settings</h1>
+            <p class="muted">View layout preferences and storage state.</p>
+          </div>
+        </header>
+        <div class="settings-body">
+          <p class="muted">Sidebar collapse preference is saved automatically for this browser.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
