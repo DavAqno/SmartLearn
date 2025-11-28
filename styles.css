@@ -9,6 +9,13 @@
   --accent: #9ad8ff;
   --accent-2: #f6a3ff;
   --border: rgba(255, 255, 255, 0.2);
+  --nav-bg: rgba(15, 20, 36, 0.65);
+  --hover-bg: rgba(255, 255, 255, 0.05);
+  --ghost-bg: rgba(255, 255, 255, 0.08);
+  --card-bg: rgba(17, 24, 39, 0.55);
+  --solid-text: #0f1424;
+  --solid-shadow: 0 10px 30px rgba(154, 216, 255, 0.35);
+  --footer-bg: rgba(15, 20, 36, 0.65);
   --glass-blur: 18px;
   --shadow-soft: 0 20px 60px rgba(0, 0, 0, 0.25);
   --shadow-inner: inset 0 1px 0 rgba(255, 255, 255, 0.3);
@@ -51,7 +58,7 @@ body {
   justify-content: space-between;
   padding: 18px 40px;
   backdrop-filter: blur(var(--glass-blur));
-  background: rgba(15, 20, 36, 0.65);
+  background: var(--nav-bg);
   border-bottom: 1px solid var(--border);
 }
 
@@ -77,7 +84,7 @@ body {
 
 .nav a:hover {
   border-color: var(--border);
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--hover-bg);
 }
 
 main {
@@ -178,7 +185,7 @@ main {
 
 .mini-card {
   padding: 18px;
-  background: rgba(17, 24, 39, 0.55);
+  background: var(--card-bg);
   border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: 18px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -236,14 +243,14 @@ main {
 
 .pill-btn.solid {
   background: linear-gradient(135deg, rgba(154, 216, 255, 0.45), rgba(246, 163, 255, 0.55));
-  color: #0f1424;
-  box-shadow: 0 10px 30px rgba(154, 216, 255, 0.35);
+  color: var(--solid-text);
+  box-shadow: var(--solid-shadow);
   border: none;
 }
 
 .pill-btn.ghost {
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.08);
+  background: var(--ghost-bg);
 }
 
 .pill-btn.outline {
@@ -373,7 +380,7 @@ main {
   color: var(--muted);
   border-top: 1px solid var(--border);
   backdrop-filter: blur(var(--glass-blur));
-  background: rgba(15, 20, 36, 0.65);
+  background: var(--footer-bg);
 }
 
 @media (max-width: 720px) {
