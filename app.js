@@ -1,18 +1,28 @@
 const storageKey = 'notes-system-data';
+const sessionStorageKey = 'notes-session-data';
 let notes = [];
 let selectedNoteId = null;
 let saveTimeout = null;
+let sessions = [];
+let activeSession = null;
+let timerInterval = null;
 
 const noteListEl = document.getElementById('noteList');
 const subjectListEl = document.getElementById('subjectList');
 const newNoteBtn = document.getElementById('newNoteBtn');
 const deleteNoteBtn = document.getElementById('deleteNoteBtn');
+const startSessionBtn = document.getElementById('startSessionBtn');
+const pauseSessionBtn = document.getElementById('pauseSessionBtn');
+const endSessionBtn = document.getElementById('endSessionBtn');
 
 const titleInput = document.getElementById('noteTitle');
 const subjectInput = document.getElementById('noteSubject');
 const contentInput = document.getElementById('noteContent');
 const createdAtEl = document.getElementById('createdAt');
 const updatedAtEl = document.getElementById('updatedAt');
+const sessionSubjectInput = document.getElementById('sessionSubject');
+const sessionTimerEl = document.getElementById('sessionTimer');
+const sessionListEl = document.getElementById('sessionList');
 
 function loadFromStorage() {
   const saved = localStorage.getItem(storageKey);
@@ -28,8 +38,26 @@ function loadFromStorage() {
   return [];
 }
 
+function loadSessions() {
+  const saved = localStorage.getItem(sessionStorageKey);
+  if (!saved) return [];
+  try {
+    const parsed = JSON.parse(saved);
+    if (Array.isArray(parsed)) {
+      return parsed;
+    }
+  } catch (err) {
+    console.error('Failed to parse sessions', err);
+  }
+  return [];
+}
+
 function persistNotes() {
   localStorage.setItem(storageKey, JSON.stringify(notes));
+}
+
+function persistSessions() {
+  localStorage.setItem(sessionStorageKey, JSON.stringify(sessions));
 }
 
 function formatDate(value) {
@@ -37,6 +65,13 @@ function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
   return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+
+function formatDuration(seconds) {
+  const hrs = String(Math.floor(seconds / 3600)).padStart(2, '0');
+  const mins = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+  const secs = String(Math.floor(seconds % 60)).padStart(2, '0');
+  return `${hrs}:${mins}:${secs}`;
 }
 
 function renderSubjects() {
@@ -96,6 +131,45 @@ function renderNotes() {
   });
 }
 
+function renderSessionHistory() {
+  sessionListEl.innerHTML = '';
+  if (sessions.length === 0) {
+    const empty = document.createElement('li');
+    empty.textContent = 'No sessions yet';
+    empty.classList.add('empty');
+    sessionListEl.appendChild(empty);
+    return;
+  }
+
+  const sorted = [...sessions].sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
+  sorted.forEach((session) => {
+    const li = document.createElement('li');
+    li.classList.add('session-item');
+
+    const title = document.createElement('div');
+    title.className = 'label';
+    title.textContent = session.subject || 'General';
+
+    const meta = document.createElement('div');
+    meta.className = 'session-meta';
+
+    const dateTag = document.createElement('span');
+    dateTag.className = 'tag';
+    dateTag.textContent = new Date(session.endTime).toLocaleDateString();
+
+    const durationTag = document.createElement('span');
+    durationTag.className = 'tag';
+    durationTag.textContent = formatDuration(session.durationInSeconds);
+
+    meta.appendChild(dateTag);
+    meta.appendChild(durationTag);
+
+    li.appendChild(title);
+    li.appendChild(meta);
+    sessionListEl.appendChild(li);
+  });
+}
+
 function clearEditor() {
   selectedNoteId = null;
   titleInput.value = '';
@@ -112,6 +186,9 @@ function populateEditor(note) {
   contentInput.value = note.content;
   createdAtEl.textContent = formatDate(note.createdAt);
   updatedAtEl.textContent = formatDate(note.updatedAt);
+  if (!sessionSubjectInput.value.trim()) {
+    sessionSubjectInput.value = note.subject || 'General';
+  }
 }
 
 function selectNote(id) {
@@ -175,13 +252,95 @@ function deleteNote() {
   }
 }
 
+function computeActiveSeconds() {
+  if (!activeSession) return 0;
+  const base = activeSession.elapsedSeconds || 0;
+  if (activeSession.isRunning && activeSession.startTime) {
+    const now = Date.now();
+    const delta = Math.floor((now - activeSession.startTime) / 1000);
+    return base + delta;
+  }
+  return base;
+}
+
+function updateTimerDisplay() {
+  if (!activeSession) {
+    sessionTimerEl.textContent = '00:00:00';
+    return;
+  }
+  sessionTimerEl.textContent = formatDuration(computeActiveSeconds());
+}
+
+function startTimerLoop() {
+  if (timerInterval) clearInterval(timerInterval);
+  timerInterval = setInterval(updateTimerDisplay, 300);
+}
+
+function startSession() {
+  const subject = sessionSubjectInput.value.trim() || subjectInput.value.trim() || 'General';
+  if (activeSession && activeSession.isRunning) return;
+
+  if (activeSession && !activeSession.isRunning) {
+    activeSession.subject = subject;
+    activeSession.isRunning = true;
+    activeSession.startTime = Date.now();
+  } else {
+    const startTime = Date.now();
+    activeSession = {
+      id: startTime.toString(),
+      subject,
+      startedAt: startTime,
+      startTime,
+      elapsedSeconds: 0,
+      isRunning: true,
+    };
+  }
+
+  sessionSubjectInput.value = subject;
+  startTimerLoop();
+  updateTimerDisplay();
+}
+
+function pauseSession() {
+  if (!activeSession || !activeSession.isRunning) return;
+  activeSession.elapsedSeconds = computeActiveSeconds();
+  activeSession.isRunning = false;
+  activeSession.startTime = null;
+  updateTimerDisplay();
+}
+
+function endSession() {
+  if (!activeSession) return;
+  const totalSeconds = computeActiveSeconds();
+  const now = new Date();
+  const sessionRecord = {
+    id: activeSession.id,
+    subject: activeSession.subject,
+    startTime: new Date(activeSession.startedAt).toISOString(),
+    endTime: now.toISOString(),
+    durationInSeconds: totalSeconds,
+  };
+  sessions.push(sessionRecord);
+  persistSessions();
+  renderSessionHistory();
+  activeSession = null;
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  updateTimerDisplay();
+}
+
 function initialize() {
   notes = loadFromStorage();
+  sessions = loadSessions();
   renderSubjects();
   renderNotes();
+  renderSessionHistory();
   if (notes.length > 0) {
     selectNote(notes[0].id);
   }
+  updateTimerDisplay();
 }
 
 newNoteBtn.addEventListener('click', createNote);
@@ -189,5 +348,8 @@ deleteNoteBtn.addEventListener('click', deleteNote);
 titleInput.addEventListener('input', scheduleSave);
 subjectInput.addEventListener('input', scheduleSave);
 contentInput.addEventListener('input', scheduleSave);
+startSessionBtn.addEventListener('click', startSession);
+pauseSessionBtn.addEventListener('click', pauseSession);
+endSessionBtn.addEventListener('click', endSession);
 
 initialize();
