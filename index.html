@@ -3,116 +3,65 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartLearn - Glassmorphic Study Flow</title>
+  <title>SmartLearn - Minimal Landing</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="bg-glow"></div>
-  <header class="nav">
+  <div class="ambient"></div>
+  <header class="topbar">
     <div class="brand">SmartLearn</div>
-    <nav class="nav-links">
-      <a href="#top">Overview</a>
-      <a href="#features">Highlights</a>
-      <a href="#cta">Get Started</a>
-    </nav>
-    <button class="pill-btn outline" id="themeToggle">Dark mode</button>
+    <div class="tag">Offline workspace</div>
   </header>
 
-  <main>
+  <main class="shell">
     <section class="hero" id="top">
-      <div class="hero-card glass">
-        <p class="eyebrow">Serious Study, Elevated</p>
-        <h1>Craft your focused, offline learning space.</h1>
-        <p class="lede">SmartLearn blends calm design with sharp organization so you can plan, capture, and master knowledge without distractions.</p>
-        <div class="cta-row">
-          <button class="pill-btn solid">Launch Workspace</button>
-          <button class="pill-btn ghost">Preview Demo</button>
-        </div>
-        <div class="meta-grid">
-          <div>
-            <p class="meta-label">No accounts</p>
-            <p class="meta-value">Offline-first</p>
+      <p class="eyebrow">Focused study, zero noise</p>
+      <h1>Stay organized with a calm, offline-first workspace.</h1>
+      <p class="lede">A simple launch point to your notes, plans, and sessions with a single Start button.</p>
+      <button class="btn start" id="startButton" data-target="/app">Start</button>
+    </section>
+
+    <section class="essentials" id="essentials">
+      <h2>Built for serious study</h2>
+      <div class="icon-grid">
+        <article class="icon-card">
+          <div class="icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2h9A2.5 2.5 0 0 1 19 4.5v15a.5.5 0 0 1-.74.44L12 17.118 5.74 19.94A.5.5 0 0 1 5 19.5z" /></svg>
           </div>
-          <div>
-            <p class="meta-label">Design</p>
-            <p class="meta-value">Glassmorphic calm</p>
+          <div class="card-copy">
+            <h3>Notes</h3>
+            <p>Capture the essentials and keep them ready offline.</p>
           </div>
-          <div>
-            <p class="meta-label">Focus</p>
-            <p class="meta-value">Distraction-free</p>
+        </article>
+        <article class="icon-card">
+          <div class="icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5v2A1.5 1.5 0 0 1 16.5 8h-9A1.5 1.5 0 0 1 6 6.5zM4 11a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1m2 4a1 1 0 0 1 1-1h10a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1" /></svg>
           </div>
-        </div>
-      </div>
-      <div class="hero-visual glass">
-        <div class="orb orb-one"></div>
-        <div class="orb orb-two"></div>
-        <div class="orb orb-three"></div>
-        <div class="card-stack">
-          <div class="mini-card">
-            <p class="mini-label">Notes</p>
-            <h3>Structured captures</h3>
-            <p class="mini-text">Tag subjects, jot insights, and keep everything synced locally.</p>
+          <div class="card-copy">
+            <h3>Planner</h3>
+            <p>Prioritize deadlines with clear subjects and priorities.</p>
           </div>
-          <div class="mini-card">
-            <p class="mini-label">Planner</p>
-            <h3>Clear timelines</h3>
-            <p class="mini-text">Prioritize deadlines with a focused plan of action.</p>
+        </article>
+        <article class="icon-card">
+          <div class="icon-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M12 3a9 9 0 1 0 9 9 9.01 9.01 0 0 0-9-9m0 2a1 1 0 0 1 1 1v5.382l3.447 3.447a1 1 0 0 1-1.414 1.414l-3.74-3.739A1 1 0 0 1 11 11V6a1 1 0 0 1 1-1" /></svg>
           </div>
-          <div class="mini-card">
-            <p class="mini-label">Sessions</p>
-            <h3>Deep focus</h3>
-            <p class="mini-text">Track deliberate study blocks with precision timing.</p>
+          <div class="card-copy">
+            <h3>Sessions</h3>
+            <p>Track focused blocks with precise timing.</p>
           </div>
-        </div>
+        </article>
       </div>
     </section>
 
-    <section class="panel glass" id="features">
-      <div class="panel-header">
-        <p class="eyebrow">Capabilities</p>
-        <h2>Everything you need to orchestrate serious study.</h2>
-      </div>
-      <div class="feature-grid">
-        <div class="tile glass-soft">
-          <p class="tile-label">Notes</p>
-          <h3>Document everything</h3>
-          <p class="tile-text">Capture structured notes with titles, subjects, and rich content that stay synced offline.</p>
-        </div>
-        <div class="tile glass-soft">
-          <p class="tile-label">Study sessions</p>
-          <h3>Track focus</h3>
-          <p class="tile-text">Timestamped timers keep your sessions accurate even when you switch tabs.</p>
-        </div>
-        <div class="tile glass-soft">
-          <p class="tile-label">Planner</p>
-          <h3>Hit deadlines</h3>
-          <p class="tile-text">Plan by subject, prioritize tasks, and stay accountable with completion states.</p>
-        </div>
-        <div class="tile glass-soft">
-          <p class="tile-label">Global search</p>
-          <h3>Index instantly</h3>
-          <p class="tile-text">Search across notes, sessions, and plans with a unified, responsive index.</p>
-        </div>
-      </div>
-    </section>
-
-    <section class="panel glass" id="cta">
-      <div class="cta-inner">
-        <div>
-          <p class="eyebrow">Ready to study smarter?</p>
-          <h2>Enter a quieter, sharper learning environment.</h2>
-          <p class="lede">Start with the essentials, stay offline, and keep the interface serene.</p>
-        </div>
-        <div class="cta-actions">
-          <button class="pill-btn solid">Start now</button>
-          <button class="pill-btn ghost">Book a walkthrough</button>
-        </div>
-      </div>
+    <section class="handoff" id="app">
+      <h2>Launch the workspace</h2>
+      <p>Hit Start to go straight to the SmartLearn app. Keep everything local and distraction-free.</p>
     </section>
   </main>
 
   <footer class="footer">
-    <p>SmartLearn · Crafted for disciplined learners</p>
+    <p>SmartLearn · Minimal landing crafted for fast access.</p>
   </footer>
 
   <script src="app.js"></script>
