@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes System</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="workspace">
+    <aside class="sidebar">
+      <div class="sidebar-brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="brand-title">Study Workspace</div>
+          <div class="brand-subtitle">Notes & plans</div>
+        </div>
+      </div>
+      <button id="newNoteBtn" class="primary-btn full-width">+ New Note</button>
+      <div class="sidebar-section">
+        <div class="section-label">Subjects</div>
+        <ul id="subjectList" class="list"></ul>
+      </div>
+      <div class="sidebar-section">
+        <div class="section-label">Notes</div>
+        <ul id="noteList" class="list"></ul>
+      </div>
+    </aside>
+
+    <main class="content">
+      <div class="content-inner">
+        <header class="document-header">
+          <input type="text" id="noteTitle" class="doc-title" placeholder="Untitled note" />
+          <div class="document-meta">
+            <div class="inline-field">
+              <label for="noteSubject">Subject</label>
+              <input type="text" id="noteSubject" placeholder="Subject" />
+            </div>
+            <div class="meta-group">
+              <span>Created <strong id="createdAt">—</strong></span>
+              <span>Updated <strong id="updatedAt">—</strong></span>
+            </div>
+          </div>
+        </header>
+
+        <div class="document-body">
+          <textarea id="noteContent" class="doc-content" placeholder="Start typing your notes..."></textarea>
+          <div class="actions">
+            <button id="deleteNoteBtn" class="danger-btn ghost">Delete Note</button>
+          </div>
+        </div>
+
+        <section class="session-panel">
+          <div class="session-header">
+            <div>
+              <p class="section-label">Focused session</p>
+              <h2>Track time on the current subject</h2>
+            </div>
+            <div class="timer" id="sessionTimer">00:00:00</div>
+          </div>
+          <div class="session-controls">
+            <div class="field-group">
+              <label for="sessionSubject">Session subject</label>
+              <input type="text" id="sessionSubject" placeholder="Subject for this session" />
+            </div>
+            <div class="session-buttons">
+              <button id="startSessionBtn" class="secondary-btn">Start</button>
+              <button id="pauseSessionBtn" class="secondary-btn">Pause</button>
+              <button id="endSessionBtn" class="danger-btn ghost">End</button>
+            </div>
+          </div>
+          <div class="session-history">
+            <div class="history-header">
+              <h3>Session history</h3>
+              <span class="muted">Recent focused work</span>
+            </div>
+            <ul id="sessionList" class="list compact"></ul>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <aside class="right-panel">
+      <div class="panel-section">
+        <div class="panel-header">
+          <div>
+            <p class="section-label">Offline Study Planner</p>
+            <h2>Plans and priorities</h2>
+          </div>
+          <button id="newPlanBtn" class="secondary-btn">Create Plan</button>
+        </div>
+
+        <div class="planner-filters">
+          <div class="field-group">
+            <label for="planFilterSubject">Subject</label>
+            <select id="planFilterSubject"></select>
+          </div>
+          <div class="field-group">
+            <label for="planFilterPriority">Priority</label>
+            <select id="planFilterPriority">
+              <option value="all">All</option>
+              <option value="high">High</option>
+              <option value="medium">Medium</option>
+              <option value="low">Low</option>
+            </select>
+          </div>
+          <div class="field-group">
+            <label for="planFilterStatus">Status</label>
+            <select id="planFilterStatus">
+              <option value="all">All</option>
+              <option value="active">Active</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <div class="planner-form">
+          <div class="field-group">
+            <label for="planTitle">Title</label>
+            <input type="text" id="planTitle" placeholder="Plan title" />
+          </div>
+          <div class="field-group">
+            <label for="planSubject">Subject</label>
+            <input type="text" id="planSubject" placeholder="Subject area" />
+          </div>
+          <div class="field-group">
+            <label for="planDescription">Description</label>
+            <textarea id="planDescription" rows="3" placeholder="Brief description"></textarea>
+          </div>
+          <div class="planner-row">
+            <div class="field-group">
+              <label for="planDeadline">Deadline</label>
+              <input type="date" id="planDeadline" />
+            </div>
+            <div class="field-group">
+              <label for="planPriority">Priority</label>
+              <select id="planPriority">
+                <option value="high">High</option>
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+              </select>
+            </div>
+            <div class="field-group checkbox-group">
+              <label for="planCompleted">Completed</label>
+              <div class="checkbox-row">
+                <input type="checkbox" id="planCompleted" />
+                <span class="muted">Mark as done</span>
+              </div>
+            </div>
+          </div>
+          <div class="planner-actions">
+            <button id="savePlanBtn" class="primary-btn">Save Plan</button>
+            <button id="deletePlanBtn" class="danger-btn ghost" type="button">Delete Plan</button>
+          </div>
+        </div>
+
+        <div class="panel-divider"></div>
+
+        <div class="planner-list-card">
+          <div class="history-header">
+            <h3>Study plans</h3>
+            <span class="muted">Sorted by deadlines</span>
+          </div>
+          <ul id="planList" class="list plan-list"></ul>
+        </div>
+      </div>
+    </aside>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
