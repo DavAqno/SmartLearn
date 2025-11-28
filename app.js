@@ -1,6 +1,10 @@
-const storageKey = 'notes-system-data';
-const sessionStorageKey = 'notes-session-data';
-const planStorageKey = 'study-plans-data';
+const storageKey = 'notes';
+const sessionStorageKey = 'studySessions';
+const planStorageKey = 'studyPlans';
+const legacyNoteKey = 'notes-system-data';
+const legacySessionKey = 'notes-session-data';
+const legacyPlanKey = 'study-plans-data';
+const sidebarStateKey = 'sidebarCollapsed';
 let notes = [];
 let selectedNoteId = null;
 let saveTimeout = null;
@@ -39,9 +43,28 @@ const planListEl = document.getElementById('planList');
 const planFilterSubject = document.getElementById('planFilterSubject');
 const planFilterPriority = document.getElementById('planFilterPriority');
 const planFilterStatus = document.getElementById('planFilterStatus');
+const globalSearchInput = document.getElementById('globalSearch');
+const searchResultsEl = document.getElementById('searchResults');
+const appContainer = document.getElementById('appContainer');
+const sidebarEl = document.getElementById('sidebar');
+const navButtons = {
+  'section-notes': document.getElementById('nav-notes'),
+  'section-sessions': document.getElementById('nav-sessions'),
+  'section-planner': document.getElementById('nav-planner'),
+  'section-search': document.getElementById('nav-search'),
+  'section-settings': document.getElementById('nav-settings'),
+};
+const sections = {
+  'section-notes': document.getElementById('section-notes'),
+  'section-sessions': document.getElementById('section-sessions'),
+  'section-planner': document.getElementById('section-planner'),
+  'section-search': document.getElementById('section-search'),
+  'section-settings': document.getElementById('section-settings'),
+};
+const toggleSidebarBtn = document.getElementById('toggleSidebar');
 
-function loadFromStorage() {
-  const saved = localStorage.getItem(storageKey);
+function parseArrayFromStorage(key, fallbackKey) {
+  const saved = localStorage.getItem(key) || (fallbackKey ? localStorage.getItem(fallbackKey) : null);
   if (!saved) return [];
   try {
     const parsed = JSON.parse(saved);
@@ -49,49 +72,39 @@ function loadFromStorage() {
       return parsed;
     }
   } catch (err) {
-    console.error('Failed to parse notes', err);
+    console.error(`Failed to parse data for ${key}`, err);
   }
   return [];
+}
+
+function loadFromStorage() {
+  return parseArrayFromStorage(storageKey, legacyNoteKey);
 }
 
 function loadSessions() {
-  const saved = localStorage.getItem(sessionStorageKey);
-  if (!saved) return [];
-  try {
-    const parsed = JSON.parse(saved);
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
-  } catch (err) {
-    console.error('Failed to parse sessions', err);
-  }
-  return [];
+  return parseArrayFromStorage(sessionStorageKey, legacySessionKey);
 }
 
 function loadPlans() {
-  const saved = localStorage.getItem(planStorageKey);
-  if (!saved) return [];
-  try {
-    const parsed = JSON.parse(saved);
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
-  } catch (err) {
-    console.error('Failed to parse plans', err);
-  }
-  return [];
+  return parseArrayFromStorage(planStorageKey, legacyPlanKey);
 }
 
 function persistNotes() {
-  localStorage.setItem(storageKey, JSON.stringify(notes));
+  const payload = JSON.stringify(notes);
+  localStorage.setItem(storageKey, payload);
+  localStorage.setItem(legacyNoteKey, payload);
 }
 
 function persistSessions() {
-  localStorage.setItem(sessionStorageKey, JSON.stringify(sessions));
+  const payload = JSON.stringify(sessions);
+  localStorage.setItem(sessionStorageKey, payload);
+  localStorage.setItem(legacySessionKey, payload);
 }
 
 function persistPlans() {
-  localStorage.setItem(planStorageKey, JSON.stringify(plans));
+  const payload = JSON.stringify(plans);
+  localStorage.setItem(planStorageKey, payload);
+  localStorage.setItem(legacyPlanKey, payload);
 }
 
 function formatDate(value) {
@@ -99,6 +112,37 @@ function formatDate(value) {
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return '—';
   return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+}
+
+function showSection(sectionId) {
+  Object.entries(sections).forEach(([id, element]) => {
+    element.style.display = id === sectionId ? 'block' : 'none';
+  });
+
+  Object.entries(navButtons).forEach(([id, btn]) => {
+    btn.classList.toggle('active', id === sectionId);
+  });
+}
+
+function applySidebarState(collapsed) {
+  if (collapsed) {
+    appContainer.classList.add('collapsed');
+    sidebarEl.classList.add('collapsed');
+  } else {
+    appContainer.classList.remove('collapsed');
+    sidebarEl.classList.remove('collapsed');
+  }
+  localStorage.setItem(sidebarStateKey, JSON.stringify(collapsed));
+}
+
+function loadSidebarState() {
+  const saved = localStorage.getItem(sidebarStateKey);
+  if (!saved) return false;
+  try {
+    return JSON.parse(saved);
+  } catch (err) {
+    return false;
+  }
 }
 
 function formatDuration(seconds) {
@@ -572,10 +616,128 @@ function endSession() {
   updateTimerDisplay();
 }
 
+function formatDateOnly(value) {
+  if (!value) return '—';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return '—';
+  return date.toISOString().slice(0, 10);
+}
+
+function buildSnippet(text, query) {
+  const safeText = text || '';
+  const lowerText = safeText.toLowerCase();
+  const idx = lowerText.indexOf(query);
+  if (idx === -1) {
+    return safeText.slice(0, 100);
+  }
+  const start = Math.max(0, idx - 20);
+  return safeText.slice(start, start + 100);
+}
+
+function renderSearchResults(items, query) {
+  searchResultsEl.innerHTML = '';
+  if (!query) return;
+
+  if (items.length === 0) {
+    const empty = document.createElement('div');
+    empty.className = 'search-result';
+    empty.textContent = 'No matches found';
+    searchResultsEl.appendChild(empty);
+    return;
+  }
+
+  items.forEach((item) => {
+    const block = document.createElement('div');
+    block.className = 'search-result';
+
+    const meta = document.createElement('div');
+    meta.className = 'result-meta';
+    const typeLabel = document.createElement('span');
+    typeLabel.className = 'result-type';
+    typeLabel.textContent = item.type;
+    const dateLabel = document.createElement('span');
+    dateLabel.textContent = formatDateOnly(item.date);
+    meta.appendChild(typeLabel);
+    meta.appendChild(dateLabel);
+
+    const title = document.createElement('div');
+    title.className = 'result-title';
+    title.textContent = item.title || 'Untitled';
+
+    const snippet = document.createElement('div');
+    snippet.className = 'result-snippet';
+    snippet.textContent = buildSnippet(item.snippetText, query);
+
+    block.appendChild(meta);
+    block.appendChild(title);
+    block.appendChild(snippet);
+    searchResultsEl.appendChild(block);
+  });
+}
+
+function handleGlobalSearch(event) {
+  const query = event.target.value.trim().toLowerCase();
+  if (!query) {
+    searchResultsEl.innerHTML = '';
+    return;
+  }
+
+  const noteData = parseArrayFromStorage(storageKey, legacyNoteKey);
+  const planData = parseArrayFromStorage(planStorageKey, legacyPlanKey);
+  const sessionData = parseArrayFromStorage(sessionStorageKey, legacySessionKey);
+
+  const results = [];
+
+  noteData.forEach((note) => {
+    const searchable = `${note.title || ''} ${note.subject || ''} ${note.content || ''}`.toLowerCase();
+    if (searchable.includes(query)) {
+      results.push({
+        type: 'NOTE',
+        title: note.title || 'Untitled note',
+        snippetText: note.content || note.title || '',
+        date: note.updatedAt || note.createdAt || note.id,
+      });
+    }
+  });
+
+  planData.forEach((plan) => {
+    const searchable = `${plan.title || ''} ${plan.subject || ''} ${plan.description || ''}`.toLowerCase();
+    if (searchable.includes(query)) {
+      results.push({
+        type: 'PLAN',
+        title: plan.title || 'Untitled plan',
+        snippetText: plan.description || plan.title || '',
+        date: plan.deadline || plan.updatedAt || plan.id,
+      });
+    }
+  });
+
+  sessionData.forEach((session) => {
+    const searchable = `${session.subject || ''} ${session.title || ''}`.toLowerCase();
+    if (searchable.includes(query)) {
+      results.push({
+        type: 'SESSION',
+        title: session.subject || session.title || 'Session',
+        snippetText: session.subject || session.title || '',
+        date: session.endTime || session.startTime || session.id,
+      });
+    }
+  });
+
+  results.sort((a, b) => {
+    const timeA = new Date(a.date).getTime();
+    const timeB = new Date(b.date).getTime();
+    return (Number.isNaN(timeB) ? 0 : timeB) - (Number.isNaN(timeA) ? 0 : timeA);
+  });
+
+  renderSearchResults(results, query);
+}
+
 function initialize() {
   notes = loadFromStorage();
   sessions = loadSessions();
   plans = loadPlans();
+  applySidebarState(loadSidebarState());
   renderSubjects();
   renderNotes();
   renderSessionHistory();
@@ -586,6 +748,7 @@ function initialize() {
     selectNote(notes[0].id);
   }
   updateTimerDisplay();
+  showSection('section-notes');
 }
 
 newNoteBtn.addEventListener('click', createNote);
@@ -602,5 +765,12 @@ deletePlanBtn.addEventListener('click', () => deletePlan());
 planFilterSubject.addEventListener('change', renderPlans);
 planFilterPriority.addEventListener('change', renderPlans);
 planFilterStatus.addEventListener('change', renderPlans);
+globalSearchInput.addEventListener('input', handleGlobalSearch);
+toggleSidebarBtn.addEventListener('click', () => applySidebarState(!appContainer.classList.contains('collapsed')));
+navButtons['section-notes'].addEventListener('click', () => showSection('section-notes'));
+navButtons['section-sessions'].addEventListener('click', () => showSection('section-sessions'));
+navButtons['section-planner'].addEventListener('click', () => showSection('section-planner'));
+navButtons['section-search'].addEventListener('click', () => showSection('section-search'));
+navButtons['section-settings'].addEventListener('click', () => showSection('section-settings'));
 
 initialize();
