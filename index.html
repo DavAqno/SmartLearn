@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notes System</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <h1>Notes</h1>
+        <button id="newNoteBtn" class="primary-btn">+ New Note</button>
+      </div>
+      <section class="section-card">
+        <h2>Subjects</h2>
+        <ul id="subjectList" class="list"></ul>
+      </section>
+      <section class="section-card">
+        <h2>Your Notes</h2>
+        <ul id="noteList" class="list"></ul>
+      </section>
+    </aside>
+    <main class="editor">
+      <div class="editor-header">
+        <div class="field-group">
+          <label for="noteTitle">Title</label>
+          <input type="text" id="noteTitle" placeholder="Note title" />
+        </div>
+        <div class="field-group">
+          <label for="noteSubject">Subject</label>
+          <input type="text" id="noteSubject" placeholder="Subject" />
+        </div>
+      </div>
+      <div class="meta">
+        <span>Created: <strong id="createdAt">—</strong></span>
+        <span>Updated: <strong id="updatedAt">—</strong></span>
+      </div>
+      <div class="field-group">
+        <label for="noteContent">Content</label>
+        <textarea id="noteContent" placeholder="Start typing your notes..."></textarea>
+      </div>
+      <div class="actions">
+        <button id="deleteNoteBtn" class="danger-btn">Delete Note</button>
+      </div>
+      <section class="session-panel">
+        <div class="session-header">
+          <div>
+            <h2>Focused Session</h2>
+            <p class="muted">Track dedicated study time for this subject.</p>
+          </div>
+          <div class="timer" id="sessionTimer">00:00:00</div>
+        </div>
+        <div class="session-controls">
+          <div class="field-group">
+            <label for="sessionSubject">Session subject</label>
+            <input type="text" id="sessionSubject" placeholder="Subject for this session" />
+          </div>
+          <div class="session-buttons">
+            <button id="startSessionBtn" class="primary-btn">Start Session</button>
+            <button id="pauseSessionBtn" class="secondary-btn">Pause Session</button>
+            <button id="endSessionBtn" class="danger-btn">End Session</button>
+          </div>
+        </div>
+        <div class="session-history">
+          <div class="history-header">
+            <h3>Session History</h3>
+            <span class="muted">Recent focused sessions</span>
+          </div>
+          <ul id="sessionList" class="list compact"></ul>
+        </div>
+      </section>
+    </main>
+  </div>
+  <script src="app.js"></script>
+</body>
+</html>
