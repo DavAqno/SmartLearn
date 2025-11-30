@@ -39,7 +39,6 @@
             z-index: 1;
         }
 
-        /* Glassmorphic card styles */
         .glass {
             background: rgba(255, 255, 255, 0.12);
             backdrop-filter: blur(20px);
@@ -178,7 +177,6 @@
             padding: 10px;
         }
 
-        /* Custom Dropdown */
         .custom-select-wrapper {
             position: relative;
         }
@@ -239,10 +237,6 @@
 
         .dropdown-item:hover {
             background: rgba(102, 126, 234, 0.08);
-        }
-
-        .dropdown-item.selected {
-            background: rgba(102, 126, 234, 0.12);
         }
 
         .dropdown-item-main {
@@ -351,7 +345,41 @@
             background: rgba(255, 255, 255, 0.25);
         }
 
-        /* Statistics Cards */
+        .btn-book {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 10px;
+            font-size: 0.95em;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-book:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+
+        .btn-airline {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-airline:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -380,7 +408,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* Sort Section */
         .sort-section {
             display: flex;
             justify-content: space-between;
@@ -421,7 +448,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* Loading */
         .loading {
             text-align: center;
             padding: 60px;
@@ -449,7 +475,6 @@
             letter-spacing: 0.3px;
         }
 
-        /* Error */
         .error {
             background: rgba(220, 53, 69, 0.85);
             color: white;
@@ -463,7 +488,6 @@
             backdrop-filter: blur(10px);
         }
 
-        /* Flight Cards */
         .flight-card {
             padding: 28px;
             border-radius: 20px;
@@ -531,9 +555,37 @@
             letter-spacing: -1px;
         }
 
+        .price-label {
+            font-size: 0.75em;
+            opacity: 0.7;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
         .price-per-person {
             font-size: 0.85em;
             opacity: 0.75;
+        }
+
+        .price-breakdown {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 8px;
+            font-size: 0.85em;
+        }
+
+        .price-breakdown-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+        }
+
+        .booking-actions {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
         }
 
         .flight-info-grid {
@@ -574,7 +626,6 @@
             font-size: 0.95em;
         }
 
-        /* Journey Timeline */
         .journey-timeline {
             margin: 28px 0;
             padding: 22px;
@@ -596,6 +647,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 18px;
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         .airline-info {
@@ -611,6 +664,15 @@
             padding: 7px 14px;
             border-radius: 8px;
             font-size: 0.875em;
+        }
+
+        .segment-price-info {
+            background: rgba(255, 193, 7, 0.15);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 8px 14px;
+            border-radius: 8px;
+            font-size: 0.85em;
+            font-weight: 600;
         }
 
         .route-display {
@@ -689,7 +751,24 @@
             line-height: 1.6;
         }
 
-        /* Responsive */
+        .helper-text {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 6px;
+        }
+
+        .info-note {
+            background: rgba(33, 150, 243, 0.15);
+            border: 1px solid rgba(33, 150, 243, 0.3);
+            padding: 12px 16px;
+            border-radius: 10px;
+            margin-top: 16px;
+            font-size: 0.85em;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
         @media (max-width: 768px) {
             h1 {
                 font-size: 2em;
@@ -720,9 +799,18 @@
             .input-grid {
                 grid-template-columns: 1fr;
             }
+
+            .booking-actions {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .btn-book, .btn-airline {
+                width: 100%;
+                justify-content: center;
+            }
         }
 
-        /* Animations */
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -738,11 +826,6 @@
             animation: fadeIn 0.5s ease-out;
         }
 
-        .flight-card:nth-child(1) { animation-delay: 0.05s; }
-        .flight-card:nth-child(2) { animation-delay: 0.1s; }
-        .flight-card:nth-child(3) { animation-delay: 0.15s; }
-
-        /* Scrollbar */
         .dropdown-list::-webkit-scrollbar {
             width: 6px;
         }
@@ -754,16 +837,6 @@
         .dropdown-list::-webkit-scrollbar-thumb {
             background: rgba(102, 126, 234, 0.4);
             border-radius: 10px;
-        }
-
-        .dropdown-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(102, 126, 234, 0.6);
-        }
-
-        .helper-text {
-            font-size: 0.8em;
-            color: rgba(255, 255, 255, 0.7);
-            margin-top: 6px;
         }
     </style>
 </head>
@@ -1005,17 +1078,14 @@
         const API_SECRET = 'oVzi4BfEnHY0N4G9';
         const BASE_URL = 'https://test.api.amadeus.com';
 
-        // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('departure').min = today;
         document.getElementById('returnDate').min = today;
 
-        // Update return date minimum when departure changes
         document.getElementById('departure').addEventListener('change', (e) => {
             document.getElementById('returnDate').min = e.target.value;
         });
 
-        // Close dropdowns when clicking outside
         document.addEventListener('click', (e) => {
             if (!e.target.closest('.custom-select-wrapper')) {
                 document.querySelectorAll('.dropdown-list').forEach(dd => {
@@ -1058,12 +1128,10 @@
             const dropdown = document.getElementById(`${fieldType}Dropdown`);
             const keyword = input.value.trim();
 
-            // Clear previous timeout
             if (searchTimeouts[fieldType]) {
                 clearTimeout(searchTimeouts[fieldType]);
             }
 
-            // Need at least 3 characters
             if (keyword.length < 3) {
                 dropdown.classList.remove('show');
                 input.classList.remove('open', 'searching');
@@ -1074,7 +1142,6 @@
             dropdown.innerHTML = '<div class="dropdown-loading"><div class="mini-spinner"></div> Buscando aeropuertos...</div>';
             dropdown.classList.add('show');
 
-            // Debounce: wait 500ms after user stops typing
             searchTimeouts[fieldType] = setTimeout(async () => {
                 try {
                     const token = await getAccessToken();
@@ -1099,7 +1166,7 @@
                 } finally {
                     input.classList.remove('searching');
                 }
-            }, 500); // Wait 500ms after user stops typing
+            }, 500);
         }
 
         function displayAirportResults(airports, fieldType) {
@@ -1299,6 +1366,23 @@
             return symbols[currency] || currency + ' ';
         }
 
+        function getAirlineWebsite(code) {
+            const airlines = {
+                'AA': 'https://www.aa.com',
+                'UA': 'https://www.united.com',
+                'DL': 'https://www.delta.com',
+                'AM': 'https://www.aeromexico.com',
+                'VB': 'https://www.vivaaerobus.com',
+                'Y4': 'https://www.volaris.com',
+                'BA': 'https://www.britishairways.com',
+                'AF': 'https://www.airfrance.com',
+                'LH': 'https://www.lufthansa.com',
+                'EK': 'https://www.emirates.com',
+                'QR': 'https://www.qatarairways.com'
+            };
+            return airlines[code] || `https://www.google.com/flights?hl=es&q=${code}`;
+        }
+
         function sortResults(sortBy) {
             currentSort = sortBy;
             updateSortButtons();
@@ -1357,9 +1441,16 @@
             const duration = formatDuration(itinerary.duration);
             const stops = segments.length - 1;
             const pricePerPerson = (price / adults).toFixed(2);
+            const basePrice = parseFloat(offer.price.base || price);
+            const taxes = price - basePrice;
 
             const firstSegment = segments[0];
             const lastSegment = segments[segments.length - 1];
+            const mainCarrier = firstSegment.carrierCode;
+            const airlineUrl = getAirlineWebsite(mainCarrier);
+
+            // Google Flights search URL
+            const googleFlightsUrl = `https://www.google.com/flights?hl=es#flt=${selectedOrigin.code}.${selectedDestination.code}.${document.getElementById('departure').value}${document.getElementById('returnDate').value ? `.${selectedDestination.code}.${selectedOrigin.code}.${document.getElementById('returnDate').value}` : ''};c:${currency};tt:o`;
 
             let card = `
                 <div class="flight-card glass ${isBest ? 'best-deal' : ''}">
@@ -1367,8 +1458,47 @@
                     
                     <div class="flight-header">
                         <div class="price-section">
+                            <div class="price-label">Precio Total</div>
                             <div class="price">${currencySymbol}${price.toFixed(2)}</div>
                             ${adults > 1 ? `<div class="price-per-person">${currencySymbol}${pricePerPerson} por persona</div>` : ''}
+                            <div class="price-breakdown">
+                                <div class="price-breakdown-item">
+                                    <span>Tarifa base:</span>
+                                    <span>${currencySymbol}${basePrice.toFixed(2)}</span>
+                                </div>
+                                <div class="price-breakdown-item">
+                                    <span>Impuestos:</span>
+                                    <span>${currencySymbol}${taxes.toFixed(2)}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="booking-actions">
+                            <a href="${googleFlightsUrl}" target="_blank" class="btn-book">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 16v-4M12 8h.01"/>
+                                </svg>
+                                Ver en Google Flights
+                            </a>
+                            <a href="${airlineUrl}" target="_blank" class="btn-airline">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+                                </svg>
+                                ${getAirlineName(mainCarrier)}
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="info-note">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <line x1="12" y1="16" x2="12" y2="12"/>
+                            <line x1="12" y1="8" x2="12.01" y2="8"/>
+                        </svg>
+                        <div>
+                            <strong>Nota:</strong> El precio mostrado es para el itinerario completo (${stops + 1} vuelo${stops > 0 ? 's' : ''}). 
+                            La API no proporciona precios individuales por segmento. Haz clic en "Ver en Google Flights" para comparar precios 
+                            o en el nombre de la aerolínea para reservar directamente.
                         </div>
                     </div>
 
@@ -1437,6 +1567,9 @@
                             </div>
                             <div class="segment-duration">
                                 ${formatDuration(segment.duration)}
+                            </div>
+                            <div class="segment-price-info">
+                                Parte del total
                             </div>
                         </div>
                         
@@ -1582,7 +1715,6 @@
             `;
         }
 
-        // Allow Enter key to search
         document.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !document.getElementById('searchBtn').disabled) {
                 const activeElement = document.activeElement;
