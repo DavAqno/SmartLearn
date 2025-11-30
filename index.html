@@ -184,7 +184,6 @@
         }
 
         .custom-select-input {
-            cursor: pointer;
             background-image: url('data:image/svg+xml,<svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1.5L6 6.5L11 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
             background-repeat: no-repeat;
             background-position: right 14px center;
@@ -197,6 +196,10 @@
             border-color: rgba(255, 255, 255, 0.4);
         }
 
+        .custom-select-input.searching {
+            background-image: none;
+        }
+
         .dropdown-list {
             position: absolute;
             top: 100%;
@@ -207,7 +210,7 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
             border-top: none;
             border-radius: 0 0 12px 12px;
-            max-height: 280px;
+            max-height: 300px;
             overflow-y: auto;
             z-index: 1000;
             box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
@@ -246,6 +249,7 @@
             display: flex;
             flex-direction: column;
             gap: 4px;
+            flex: 1;
         }
 
         .dropdown-item-city {
@@ -267,6 +271,18 @@
             font-size: 0.8em;
             font-weight: 600;
             letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .dropdown-loading {
+            padding: 20px;
+            text-align: center;
+            color: #667eea;
+            font-size: 0.9em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .dropdown-no-results {
@@ -274,6 +290,15 @@
             text-align: center;
             color: #999;
             font-size: 0.9em;
+        }
+
+        .mini-spinner {
+            border: 2px solid rgba(102, 126, 234, 0.2);
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            animation: spin 0.8s linear infinite;
         }
 
         .search-actions {
@@ -734,6 +759,12 @@
         .dropdown-list::-webkit-scrollbar-thumb:hover {
             background: rgba(102, 126, 234, 0.6);
         }
+
+        .helper-text {
+            font-size: 0.8em;
+            color: rgba(255, 255, 255, 0.7);
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
@@ -763,12 +794,12 @@
                     <input type="text" 
                            id="origin" 
                            class="custom-select-input"
-                           placeholder="Selecciona ciudad..." 
+                           placeholder="Ciudad o código IATA (ej: MEX, Cancun)..." 
                            autocomplete="off"
-                           oninput="filterAirports('origin')"
-                           onfocus="showDropdown('origin')"
-                           readonly>
+                           oninput="searchAirports('origin')"
+                           onfocus="this.select()">
                     <div id="originDropdown" class="dropdown-list"></div>
+                    <div class="helper-text">Escribe al menos 3 caracteres</div>
                 </div>
 
                 <div class="form-field custom-select-wrapper">
@@ -782,12 +813,12 @@
                     <input type="text" 
                            id="destination" 
                            class="custom-select-input"
-                           placeholder="Selecciona ciudad..." 
+                           placeholder="Ciudad o código IATA (ej: NYC, London)..." 
                            autocomplete="off"
-                           oninput="filterAirports('destination')"
-                           onfocus="showDropdown('destination')"
-                           readonly>
+                           oninput="searchAirports('destination')"
+                           onfocus="this.select()">
                     <div id="destinationDropdown" class="dropdown-list"></div>
+                    <div class="helper-text">Escribe al menos 3 caracteres</div>
                 </div>
 
                 <div class="form-field">
@@ -967,82 +998,12 @@
         let tripType = 'one-way';
         let selectedOrigin = null;
         let selectedDestination = null;
+        let searchTimeouts = {};
 
         // ⚙️ CONFIGURA TUS CREDENCIALES DE AMADEUS API AQUÍ
         const API_KEY = 'mPYrgCttRBEG6yUuDSXvrZ5SIzpbn0qe';
         const API_SECRET = 'oVzi4BfEnHY0N4G9';
         const BASE_URL = 'https://test.api.amadeus.com';
-
-        // Lista estática de aeropuertos principales (evita 429 rate limit)
-        const AIRPORTS = [
-            // Estados Unidos
-            { city: 'New York', code: 'JFK', name: 'John F. Kennedy International', country: 'USA' },
-            { city: 'New York', code: 'LGA', name: 'LaGuardia Airport', country: 'USA' },
-            { city: 'New York', code: 'EWR', name: 'Newark Liberty International', country: 'USA' },
-            { city: 'Los Angeles', code: 'LAX', name: 'Los Angeles International', country: 'USA' },
-            { city: 'Chicago', code: 'ORD', name: "O'Hare International", country: 'USA' },
-            { city: 'Miami', code: 'MIA', name: 'Miami International', country: 'USA' },
-            { city: 'San Francisco', code: 'SFO', name: 'San Francisco International', country: 'USA' },
-            { city: 'Las Vegas', code: 'LAS', name: 'Harry Reid International', country: 'USA' },
-            { city: 'Seattle', code: 'SEA', name: 'Seattle-Tacoma International', country: 'USA' },
-            { city: 'Boston', code: 'BOS', name: 'Logan International', country: 'USA' },
-            { city: 'Orlando', code: 'MCO', name: 'Orlando International', country: 'USA' },
-            { city: 'Atlanta', code: 'ATL', name: 'Hartsfield-Jackson Atlanta International', country: 'USA' },
-            { city: 'Dallas', code: 'DFW', name: 'Dallas/Fort Worth International', country: 'USA' },
-            { city: 'Houston', code: 'IAH', name: 'George Bush Intercontinental', country: 'USA' },
-            { city: 'Phoenix', code: 'PHX', name: 'Phoenix Sky Harbor International', country: 'USA' },
-            
-            // México
-            { city: 'Mexico City', code: 'MEX', name: 'Mexico City International', country: 'Mexico' },
-            { city: 'Cancún', code: 'CUN', name: 'Cancún International', country: 'Mexico' },
-            { city: 'Guadalajara', code: 'GDL', name: 'Miguel Hidalgo y Costilla International', country: 'Mexico' },
-            { city: 'Monterrey', code: 'MTY', name: 'General Mariano Escobedo International', country: 'Mexico' },
-            { city: 'Tijuana', code: 'TIJ', name: 'General Abelardo L. Rodríguez International', country: 'Mexico' },
-            { city: 'Los Cabos', code: 'SJD', name: 'Los Cabos International', country: 'Mexico' },
-            { city: 'Puerto Vallarta', code: 'PVR', name: 'Licenciado Gustavo Díaz Ordaz International', country: 'Mexico' },
-            
-            // Europa
-            { city: 'London', code: 'LHR', name: 'Heathrow Airport', country: 'UK' },
-            { city: 'London', code: 'LGW', name: 'Gatwick Airport', country: 'UK' },
-            { city: 'Paris', code: 'CDG', name: 'Charles de Gaulle', country: 'France' },
-            { city: 'Paris', code: 'ORY', name: 'Orly Airport', country: 'France' },
-            { city: 'Madrid', code: 'MAD', name: 'Adolfo Suárez Madrid-Barajas', country: 'Spain' },
-            { city: 'Barcelona', code: 'BCN', name: 'Barcelona-El Prat', country: 'Spain' },
-            { city: 'Rome', code: 'FCO', name: 'Leonardo da Vinci-Fiumicino', country: 'Italy' },
-            { city: 'Amsterdam', code: 'AMS', name: 'Amsterdam Airport Schiphol', country: 'Netherlands' },
-            { city: 'Frankfurt', code: 'FRA', name: 'Frankfurt Airport', country: 'Germany' },
-            { city: 'Munich', code: 'MUC', name: 'Munich Airport', country: 'Germany' },
-            { city: 'Zurich', code: 'ZRH', name: 'Zurich Airport', country: 'Switzerland' },
-            { city: 'Vienna', code: 'VIE', name: 'Vienna International Airport', country: 'Austria' },
-            
-            // Asia
-            { city: 'Tokyo', code: 'NRT', name: 'Narita International', country: 'Japan' },
-            { city: 'Tokyo', code: 'HND', name: 'Haneda Airport', country: 'Japan' },
-            { city: 'Singapore', code: 'SIN', name: 'Singapore Changi Airport', country: 'Singapore' },
-            { city: 'Hong Kong', code: 'HKG', name: 'Hong Kong International', country: 'Hong Kong' },
-            { city: 'Dubai', code: 'DXB', name: 'Dubai International', country: 'UAE' },
-            { city: 'Seoul', code: 'ICN', name: 'Incheon International', country: 'South Korea' },
-            { city: 'Bangkok', code: 'BKK', name: 'Suvarnabhumi Airport', country: 'Thailand' },
-            { city: 'Shanghai', code: 'PVG', name: 'Pudong International', country: 'China' },
-            { city: 'Beijing', code: 'PEK', name: 'Beijing Capital International', country: 'China' },
-            { city: 'Delhi', code: 'DEL', name: 'Indira Gandhi International', country: 'India' },
-            
-            // Oceanía
-            { city: 'Sydney', code: 'SYD', name: 'Sydney Kingsford Smith', country: 'Australia' },
-            { city: 'Melbourne', code: 'MEL', name: 'Melbourne Airport', country: 'Australia' },
-            { city: 'Auckland', code: 'AKL', name: 'Auckland Airport', country: 'New Zealand' },
-            
-            // Canadá
-            { city: 'Toronto', code: 'YYZ', name: 'Toronto Pearson International', country: 'Canada' },
-            { city: 'Vancouver', code: 'YVR', name: 'Vancouver International', country: 'Canada' },
-            { city: 'Montreal', code: 'YUL', name: 'Montréal-Pierre Elliott Trudeau International', country: 'Canada' },
-            
-            // Sudamérica
-            { city: 'São Paulo', code: 'GRU', name: 'São Paulo-Guarulhos International', country: 'Brazil' },
-            { city: 'Buenos Aires', code: 'EZE', name: 'Ministro Pistarini International', country: 'Argentina' },
-            { city: 'Lima', code: 'LIM', name: 'Jorge Chávez International', country: 'Peru' },
-            { city: 'Bogotá', code: 'BOG', name: 'El Dorado International', country: 'Colombia' },
-        ];
 
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
@@ -1060,73 +1021,111 @@
                 document.querySelectorAll('.dropdown-list').forEach(dd => {
                     dd.classList.remove('show');
                     const input = dd.previousElementSibling;
-                    if (input) input.classList.remove('open');
+                    if (input && input.classList) input.classList.remove('open');
                 });
             }
         });
 
-        function showDropdown(fieldType) {
-            const input = document.getElementById(fieldType);
-            const dropdown = document.getElementById(`${fieldType}Dropdown`);
-            
-            input.removeAttribute('readonly');
-            input.select();
-            input.classList.add('open');
-            displayAirportList(AIRPORTS, fieldType);
-            dropdown.classList.add('show');
+        async function getAccessToken() {
+            if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+                return accessToken;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/v1/security/oauth2/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `grant_type=client_credentials&client_id=${API_KEY}&client_secret=${API_SECRET}`
+                });
+
+                if (!response.ok) {
+                    throw new Error('Autenticación fallida. Verifica tus credenciales API.');
+                }
+
+                const data = await response.json();
+                accessToken = data.access_token;
+                tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000;
+                return accessToken;
+            } catch (error) {
+                throw new Error('Error al autenticar con Amadeus API.');
+            }
         }
 
-        function filterAirports(fieldType) {
+        async function searchAirports(fieldType) {
             const input = document.getElementById(fieldType);
-            const searchText = input.value.toLowerCase().trim();
-            
-            if (!searchText) {
-                displayAirportList(AIRPORTS, fieldType);
+            const dropdown = document.getElementById(`${fieldType}Dropdown`);
+            const keyword = input.value.trim();
+
+            // Clear previous timeout
+            if (searchTimeouts[fieldType]) {
+                clearTimeout(searchTimeouts[fieldType]);
+            }
+
+            // Need at least 3 characters
+            if (keyword.length < 3) {
+                dropdown.classList.remove('show');
+                input.classList.remove('open', 'searching');
                 return;
             }
 
-            const filtered = AIRPORTS.filter(airport => {
-                const city = airport.city.toLowerCase();
-                const country = airport.country.toLowerCase();
-                const name = airport.name.toLowerCase();
-                const code = airport.code.toLowerCase();
-                
-                return city.includes(searchText) || 
-                       country.includes(searchText) || 
-                       name.includes(searchText) ||
-                       code.includes(searchText);
-            });
+            input.classList.add('open', 'searching');
+            dropdown.innerHTML = '<div class="dropdown-loading"><div class="mini-spinner"></div> Buscando aeropuertos...</div>';
+            dropdown.classList.add('show');
 
-            displayAirportList(filtered, fieldType);
+            // Debounce: wait 500ms after user stops typing
+            searchTimeouts[fieldType] = setTimeout(async () => {
+                try {
+                    const token = await getAccessToken();
+                    const response = await fetch(
+                        `${BASE_URL}/v1/reference-data/locations?subType=AIRPORT,CITY&keyword=${encodeURIComponent(keyword)}&page[limit]=15`,
+                        {
+                            headers: {
+                                'Authorization': `Bearer ${token}`
+                            }
+                        }
+                    );
+
+                    if (!response.ok) {
+                        throw new Error('Error buscando aeropuertos');
+                    }
+
+                    const data = await response.json();
+                    displayAirportResults(data.data || [], fieldType);
+                } catch (error) {
+                    console.error('Error:', error);
+                    dropdown.innerHTML = '<div class="dropdown-no-results">Error al buscar aeropuertos. Intenta de nuevo.</div>';
+                } finally {
+                    input.classList.remove('searching');
+                }
+            }, 500); // Wait 500ms after user stops typing
         }
 
-        function displayAirportList(airports, fieldType) {
+        function displayAirportResults(airports, fieldType) {
             const dropdown = document.getElementById(`${fieldType}Dropdown`);
             
             if (airports.length === 0) {
                 dropdown.innerHTML = '<div class="dropdown-no-results">No se encontraron aeropuertos</div>';
-                dropdown.classList.add('show');
                 return;
             }
 
-            const selectedCode = fieldType === 'origin' ? selectedOrigin?.code : selectedDestination?.code;
-
             dropdown.innerHTML = airports.map(airport => {
-                const isSelected = airport.code === selectedCode;
+                const cityName = airport.address?.cityName || '';
+                const countryName = airport.address?.countryName || '';
+                const airportName = airport.name || '';
+                const iataCode = airport.iataCode;
 
                 return `
-                    <div class="dropdown-item ${isSelected ? 'selected' : ''}" 
-                         onclick="selectAirport('${airport.code}', '${airport.city}', '${airport.name}', '${airport.country}', '${fieldType}')">
+                    <div class="dropdown-item" onclick="selectAirport('${iataCode}', '${cityName.replace(/'/g, "\\'")}', '${airportName.replace(/'/g, "\\'")}', '${countryName.replace(/'/g, "\\'")}', '${fieldType}')">
                         <div class="dropdown-item-main">
-                            <div class="dropdown-item-city">${airport.city}</div>
-                            <div class="dropdown-item-airport">${airport.name}, ${airport.country}</div>
+                            <div class="dropdown-item-city">${cityName}</div>
+                            <div class="dropdown-item-airport">${airportName}${countryName ? `, ${countryName}` : ''}</div>
                         </div>
-                        <div class="dropdown-item-code">${airport.code}</div>
+                        <div class="dropdown-item-code">${iataCode}</div>
                     </div>
                 `;
             }).join('');
-
-            dropdown.classList.add('show');
         }
 
         function selectAirport(code, city, name, country, fieldType) {
@@ -1143,8 +1142,7 @@
             const dropdown = document.getElementById(`${fieldType}Dropdown`);
             const input = document.getElementById(fieldType);
             dropdown.classList.remove('show');
-            input.classList.remove('open');
-            input.setAttribute('readonly', '');
+            input.classList.remove('open', 'searching');
         }
 
         function setTripType(type) {
@@ -1173,41 +1171,14 @@
             hideError();
         }
 
-        async function getAccessToken() {
-            if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
-                return accessToken;
-            }
-
-            try {
-                const response = await fetch(`${BASE_URL}/v1/security/oauth2/token`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: `grant_type=client_credentials&client_id=${API_KEY}&client_secret=${API_SECRET}`
-                });
-
-                if (!response.ok) {
-                    throw new Error('Autenticación fallida. Verifica tus credenciales API.');
-                }
-
-                const data = await response.json();
-                accessToken = data.access_token;
-                tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000;
-                return accessToken;
-            } catch (error) {
-                throw new Error('Error al autenticar con Amadeus API. Verifica tus credenciales.');
-            }
-        }
-
         async function searchFlights() {
             if (!selectedOrigin) {
-                showError('Por favor selecciona un aeropuerto de origen del menú desplegable');
+                showError('Por favor selecciona un aeropuerto de origen');
                 return;
             }
 
             if (!selectedDestination) {
-                showError('Por favor selecciona un aeropuerto de destino del menú desplegable');
+                showError('Por favor selecciona un aeropuerto de destino');
                 return;
             }
 
@@ -1229,7 +1200,7 @@
             }
 
             if (tripType === 'round-trip' && !returnDate) {
-                showError('Por favor selecciona una fecha de regreso para vuelo redondo');
+                showError('Por favor selecciona una fecha de regreso');
                 return;
             }
 
@@ -1371,7 +1342,7 @@
 
             const adults = parseInt(document.getElementById('adults').value);
             document.getElementById('resultsInfo').textContent = 
-                `Found ${sorted.length} flight${sorted.length !== 1 ? 's' : ''} for ${adults} adult${adults !== 1 ? 's' : ''}`;
+                `Encontrados ${sorted.length} vuelo${sorted.length !== 1 ? 's' : ''} para ${adults} adulto${adults !== 1 ? 's' : ''}`;
 
             const resultsHtml = sorted.map((offer, index) => createFlightCard(offer, index === 0, adults)).join('');
             document.getElementById('results').innerHTML = resultsHtml;
@@ -1392,12 +1363,12 @@
 
             let card = `
                 <div class="flight-card glass ${isBest ? 'best-deal' : ''}">
-                    ${isBest ? '<div class="best-deal-badge">BEST DEAL</div>' : ''}
+                    ${isBest ? '<div class="best-deal-badge">MEJOR PRECIO</div>' : ''}
                     
                     <div class="flight-header">
                         <div class="price-section">
                             <div class="price">${currencySymbol}${price.toFixed(2)}</div>
-                            ${adults > 1 ? `<div class="price-per-person">${currencySymbol}${pricePerPerson} per person</div>` : ''}
+                            ${adults > 1 ? `<div class="price-per-person">${currencySymbol}${pricePerPerson} por persona</div>` : ''}
                         </div>
                     </div>
 
@@ -1410,7 +1381,7 @@
                                 </svg>
                             </div>
                             <div class="info-content">
-                                <div class="info-label">Duration</div>
+                                <div class="info-label">Duración</div>
                                 <div class="info-value">${duration}</div>
                             </div>
                         </div>
@@ -1422,8 +1393,8 @@
                                 </svg>
                             </div>
                             <div class="info-content">
-                                <div class="info-label">Stops</div>
-                                <div class="info-value">${stops === 0 ? 'Direct' : `${stops} stop${stops > 1 ? 's' : ''}`}</div>
+                                <div class="info-label">Escalas</div>
+                                <div class="info-value">${stops === 0 ? 'Directo' : `${stops} escala${stops > 1 ? 's' : ''}`}</div>
                             </div>
                         </div>
                         <div class="info-item">
@@ -1433,7 +1404,7 @@
                                 </svg>
                             </div>
                             <div class="info-content">
-                                <div class="info-label">Departure</div>
+                                <div class="info-label">Salida</div>
                                 <div class="info-value">${formatTime(firstSegment.departure.at)}</div>
                             </div>
                         </div>
@@ -1445,7 +1416,7 @@
                                 </svg>
                             </div>
                             <div class="info-content">
-                                <div class="info-label">Arrival</div>
+                                <div class="info-label">Llegada</div>
                                 <div class="info-value">${formatTime(lastSegment.arrival.at)}</div>
                             </div>
                         </div>
@@ -1484,7 +1455,7 @@
                         </div>
                         
                         <div class="segment-details">
-                            <div>Aircraft: ${segment.aircraft?.code || 'N/A'}</div>
+                            <div>Aeronave: ${segment.aircraft?.code || 'N/A'}</div>
                         </div>
                     </div>
                 `;
@@ -1497,7 +1468,7 @@
                                 <circle cx="12" cy="12" r="10"/>
                                 <polyline points="12 6 12 12 16 14"/>
                             </svg>
-                            <span>Layover: ${layoverTime} at ${segment.arrival.iataCode}</span>
+                            <span>Escala: ${layoverTime} en ${segment.arrival.iataCode}</span>
                         </div>
                     `;
                 }
@@ -1544,7 +1515,7 @@
 
         function formatTime(datetime) {
             const date = new Date(datetime);
-            return date.toLocaleTimeString('en-US', { 
+            return date.toLocaleTimeString('es-MX', { 
                 hour: '2-digit', 
                 minute: '2-digit',
                 hour12: true 
@@ -1553,7 +1524,7 @@
 
         function formatDate(datetime) {
             const date = new Date(datetime);
-            return date.toLocaleDateString('en-US', { 
+            return date.toLocaleDateString('es-MX', { 
                 month: 'short', 
                 day: 'numeric',
                 year: 'numeric'
@@ -1604,9 +1575,9 @@
         function showNoResults() {
             document.getElementById('results').innerHTML = `
                 <div class="no-results glass" style="border-radius: 20px; padding: 80px 40px;">
-                    <h3>No flights found</h3>
-                    <p>Try adjusting your search criteria or selecting different dates.</p>
-                    <p style="margin-top: 16px; opacity: 0.75;">Consider checking nearby airports or being flexible with your travel dates.</p>
+                    <h3>No se encontraron vuelos</h3>
+                    <p>Intenta ajustar tus criterios de búsqueda o seleccionar diferentes fechas.</p>
+                    <p style="margin-top: 16px; opacity: 0.75;">Considera revisar aeropuertos cercanos o ser más flexible con tus fechas de viaje.</p>
                 </div>
             `;
         }
