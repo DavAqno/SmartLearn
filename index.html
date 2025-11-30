@@ -1,69 +1,1611 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SmartLearn - Minimal Landing</title>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Flight Price Analyzer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            min-height: 100vh;
+            padding: 20px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml,<svg width="60" height="60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="1.5" fill="rgba(255,255,255,0.08)"/></svg>');
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphic card styles */
+        .glass {
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.22);
+            backdrop-filter: blur(25px);
+            -webkit-backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        h1 {
+            text-align: center;
+            color: white;
+            margin-bottom: 15px;
+            font-size: 2.8em;
+            font-weight: 600;
+            text-shadow: 0 2px 20px rgba(0,0,0,0.15);
+            letter-spacing: -0.5px;
+        }
+
+        .header-subtitle {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.85);
+            margin-bottom: 40px;
+            font-size: 1em;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+        }
+
+        .search-section {
+            padding: 35px;
+            border-radius: 24px;
+            margin-bottom: 30px;
+        }
+
+        .search-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .tab {
+            padding: 12px 28px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            color: rgba(255, 255, 255, 0.85);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            font-size: 0.95em;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.25);
+        }
+
+        .tab.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.35);
+            color: white;
+        }
+
+        .input-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 20px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        label {
+            font-weight: 500;
+            margin-bottom: 10px;
+            color: white;
+            font-size: 0.875em;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .icon {
+            width: 16px;
+            height: 16px;
+            display: inline-block;
+        }
+
+        input, select {
+            padding: 15px 16px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            font-size: 0.95em;
+            transition: all 0.3s ease;
+            color: white;
+            backdrop-filter: blur(10px);
+            font-weight: 400;
+        }
+
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.15);
+            appearance: none;
+            background-image: url('data:image/svg+xml,<svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1.5L6 6.5L11 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        select option {
+            background: #667eea;
+            color: white;
+            padding: 10px;
+        }
+
+        /* Custom Dropdown */
+        .custom-select-wrapper {
+            position: relative;
+        }
+
+        .custom-select-input {
+            cursor: pointer;
+            background-image: url('data:image/svg+xml,<svg width="12" height="8" viewBox="0 0 12 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1.5L6 6.5L11 1.5" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            padding-right: 40px;
+        }
+
+        .custom-select-input.open {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .dropdown-list {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-top: none;
+            border-radius: 0 0 12px 12px;
+            max-height: 280px;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            display: none;
+        }
+
+        .dropdown-list.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            padding: 14px 16px;
+            cursor: pointer;
+            transition: background 0.2s ease;
+            color: #333;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.04);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+            border-radius: 0 0 12px 12px;
+        }
+
+        .dropdown-item:hover {
+            background: rgba(102, 126, 234, 0.08);
+        }
+
+        .dropdown-item.selected {
+            background: rgba(102, 126, 234, 0.12);
+        }
+
+        .dropdown-item-main {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .dropdown-item-city {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 0.95em;
+        }
+
+        .dropdown-item-airport {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .dropdown-item-code {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8em;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .dropdown-no-results {
+            padding: 20px;
+            text-align: center;
+            color: #999;
+            font-size: 0.9em;
+        }
+
+        .search-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        button {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: center;
+            letter-spacing: 0.3px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.35);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        /* Statistics Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 18px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            padding: 24px;
+            border-radius: 16px;
+            text-align: center;
+            color: white;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 8px;
+            letter-spacing: -0.5px;
+        }
+
+        .stat-label {
+            font-size: 0.875em;
+            opacity: 0.85;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Sort Section */
+        .sort-section {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 18px;
+        }
+
+        .sort-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn-sort {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            padding: 11px 20px;
+            border-radius: 10px;
+            font-size: 0.875em;
+        }
+
+        .btn-sort:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        .btn-sort.active {
+            background: rgba(255, 255, 255, 0.35);
+            border-color: rgba(255, 255, 255, 0.45);
+        }
+
+        .results-info {
+            color: white;
+            font-size: 1.05em;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: white;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.2);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 1.1em;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+        }
+
+        /* Error */
+        .error {
+            background: rgba(220, 53, 69, 0.85);
+            color: white;
+            padding: 18px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Flight Cards */
+        .flight-card {
+            padding: 28px;
+            border-radius: 20px;
+            margin-bottom: 22px;
+            transition: all 0.3s ease;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .flight-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, #667eea, #764ba2, #f093fb);
+        }
+
+        .flight-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+            background: rgba(255, 255, 255, 0.18);
+        }
+
+        .flight-card.best-deal {
+            border: 2px solid rgba(40, 167, 69, 0.5);
+            background: rgba(40, 167, 69, 0.12);
+        }
+
+        .best-deal-badge {
+            position: absolute;
+            top: 24px;
+            right: 24px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+            letter-spacing: 0.5px;
+        }
+
+        .flight-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 28px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .price-section {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .price {
+            font-size: 2.4em;
+            font-weight: 700;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+
+        .price-per-person {
+            font-size: 0.85em;
+            opacity: 0.75;
+        }
+
+        .flight-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 14px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-icon {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .info-content {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .info-label {
+            font-size: 0.75em;
+            opacity: 0.75;
+            margin-bottom: 3px;
+            letter-spacing: 0.3px;
+        }
+
+        .info-value {
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        /* Journey Timeline */
+        .journey-timeline {
+            margin: 28px 0;
+            padding: 22px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+        }
+
+        .segment {
+            position: relative;
+            padding: 22px;
+            margin-bottom: 16px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 14px;
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .segment-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .airline-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            font-size: 0.95em;
+        }
+
+        .segment-duration {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 7px 14px;
+            border-radius: 8px;
+            font-size: 0.875em;
+        }
+
+        .route-display {
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            margin-bottom: 18px;
+        }
+
+        .airport-info {
+            flex: 1;
+        }
+
+        .airport-code {
+            font-size: 1.7em;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: 1px;
+        }
+
+        .airport-time {
+            font-size: 1.15em;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+
+        .airport-date {
+            font-size: 0.85em;
+            opacity: 0.65;
+        }
+
+        .route-arrow {
+            font-size: 1.8em;
+            opacity: 0.5;
+            flex-shrink: 0;
+        }
+
+        .segment-details {
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+            font-size: 0.875em;
+            opacity: 0.85;
+        }
+
+        .layover {
+            background: rgba(255, 193, 7, 0.15);
+            border: 1px solid rgba(255, 193, 7, 0.3);
+            padding: 16px;
+            border-radius: 12px;
+            margin: 16px 0;
+            text-align: center;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.95em;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 80px 20px;
+            color: white;
+        }
+
+        .no-results h3 {
+            font-size: 1.8em;
+            margin-bottom: 16px;
+            font-weight: 600;
+        }
+
+        .no-results p {
+            font-size: 1em;
+            opacity: 0.85;
+            line-height: 1.6;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .search-section {
+                padding: 24px;
+            }
+
+            .flight-header {
+                flex-direction: column;
+            }
+
+            .price {
+                font-size: 2em;
+            }
+
+            .airport-code {
+                font-size: 1.4em;
+            }
+
+            .best-deal-badge {
+                position: static;
+                display: inline-block;
+                margin-bottom: 16px;
+            }
+
+            .input-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .flight-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .flight-card:nth-child(1) { animation-delay: 0.05s; }
+        .flight-card:nth-child(2) { animation-delay: 0.1s; }
+        .flight-card:nth-child(3) { animation-delay: 0.15s; }
+
+        /* Scrollbar */
+        .dropdown-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb {
+            background: rgba(102, 126, 234, 0.4);
+            border-radius: 10px;
+        }
+
+        .dropdown-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(102, 126, 234, 0.6);
+        }
+    </style>
 </head>
 <body>
-  <div class="ambient"></div>
-  <header class="topbar">
-    <div class="brand">SmartLearn</div>
-    <div class="tag">Offline workspace</div>
-  </header>
+    <div class="container">
+        <h1>Flight Price Analyzer</h1>
+        <p class="header-subtitle">Find the best flight deals with real-time pricing</p>
+        
+        <div class="search-section glass-strong">
+            <div class="search-tabs">
+                <div class="tab active" onclick="setTripType('one-way')">
+                    <span>One Way</span>
+                </div>
+                <div class="tab" onclick="setTripType('round-trip')">
+                    <span>Round Trip</span>
+                </div>
+            </div>
 
-  <main class="shell">
-    <section class="hero" id="top">
-      <p class="eyebrow">Focused study, zero noise</p>
-      <h1>Stay organized with a calm, offline-first workspace.</h1>
-      <p class="lede">A simple launch point to your notes, plans, and sessions with a single Start button.</p>
-      <button class="btn start" id="startButton" data-target="/app">Start</button>
-    </section>
+            <div class="input-grid">
+                <div class="form-field custom-select-wrapper">
+                    <label for="origin">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        From
+                    </label>
+                    <input type="text" 
+                           id="origin" 
+                           class="custom-select-input"
+                           placeholder="Select or type city name..." 
+                           autocomplete="off"
+                           oninput="filterAirports('origin')"
+                           onfocus="showDropdown('origin')"
+                           readonly>
+                    <div id="originDropdown" class="dropdown-list"></div>
+                </div>
 
-    <section class="essentials" id="essentials">
-      <h2>Built for serious study</h2>
-      <div class="icon-grid">
-        <article class="icon-card">
-          <div class="icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M5 4.5A2.5 2.5 0 0 1 7.5 2h9A2.5 2.5 0 0 1 19 4.5v15a.5.5 0 0 1-.74.44L12 17.118 5.74 19.94A.5.5 0 0 1 5 19.5z" /></svg>
-          </div>
-          <div class="card-copy">
-            <h3>Notes</h3>
-            <p>Capture the essentials and keep them ready offline.</p>
-          </div>
-        </article>
-        <article class="icon-card">
-          <div class="icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5v2A1.5 1.5 0 0 1 16.5 8h-9A1.5 1.5 0 0 1 6 6.5zM4 11a1 1 0 0 1 1-1h14a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1m2 4a1 1 0 0 1 1-1h10a1 1 0 1 1 0 2H7a1 1 0 0 1-1-1" /></svg>
-          </div>
-          <div class="card-copy">
-            <h3>Planner</h3>
-            <p>Prioritize deadlines with clear subjects and priorities.</p>
-          </div>
-        </article>
-        <article class="icon-card">
-          <div class="icon-badge" aria-hidden="true">
-            <svg viewBox="0 0 24 24" role="img" focusable="false"><path d="M12 3a9 9 0 1 0 9 9 9.01 9.01 0 0 0-9-9m0 2a1 1 0 0 1 1 1v5.382l3.447 3.447a1 1 0 0 1-1.414 1.414l-3.74-3.739A1 1 0 0 1 11 11V6a1 1 0 0 1 1-1" /></svg>
-          </div>
-          <div class="card-copy">
-            <h3>Sessions</h3>
-            <p>Track focused blocks with precise timing.</p>
-          </div>
-        </article>
-      </div>
-    </section>
+                <div class="form-field custom-select-wrapper">
+                    <label for="destination">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s-8-4.5-8-11.8A8 8 0 0 1 12 2a8 8 0 0 1 8 8.2c0 7.3-8 11.8-8 11.8z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        To
+                    </label>
+                    <input type="text" 
+                           id="destination" 
+                           class="custom-select-input"
+                           placeholder="Select or type city name..." 
+                           autocomplete="off"
+                           oninput="filterAirports('destination')"
+                           onfocus="showDropdown('destination')"
+                           readonly>
+                    <div id="destinationDropdown" class="dropdown-list"></div>
+                </div>
 
-    <section class="handoff" id="app">
-      <h2>Launch the workspace</h2>
-      <p>Hit Start to go straight to the SmartLearn app. Keep everything local and distraction-free.</p>
-    </section>
-  </main>
+                <div class="form-field">
+                    <label for="departure">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        Departure Date
+                    </label>
+                    <input type="date" id="departure" required>
+                </div>
 
-  <footer class="footer">
-    <p>SmartLearn · Minimal landing crafted for fast access.</p>
-  </footer>
+                <div class="form-field" id="returnDateField" style="display: none;">
+                    <label for="returnDate">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                            <line x1="16" y1="2" x2="16" y2="6"/>
+                            <line x1="8" y1="2" x2="8" y2="6"/>
+                            <line x1="3" y1="10" x2="21" y2="10"/>
+                        </svg>
+                        Return Date
+                    </label>
+                    <input type="date" id="returnDate">
+                </div>
+            </div>
 
-  <script src="app.js"></script>
+            <div class="input-grid">
+                <div class="form-field">
+                    <label for="adults">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                            <circle cx="12" cy="7" r="4"/>
+                        </svg>
+                        Adults
+                    </label>
+                    <select id="adults">
+                        <option value="1">1 Adult</option>
+                        <option value="2">2 Adults</option>
+                        <option value="3">3 Adults</option>
+                        <option value="4">4 Adults</option>
+                        <option value="5">5 Adults</option>
+                        <option value="6">6 Adults</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="travelClass">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2"/>
+                        </svg>
+                        Class
+                    </label>
+                    <select id="travelClass">
+                        <option value="ECONOMY">Economy</option>
+                        <option value="PREMIUM_ECONOMY">Premium Economy</option>
+                        <option value="BUSINESS">Business</option>
+                        <option value="FIRST">First Class</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="maxResults">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="8" y1="6" x2="21" y2="6"/>
+                            <line x1="8" y1="12" x2="21" y2="12"/>
+                            <line x1="8" y1="18" x2="21" y2="18"/>
+                            <line x1="3" y1="6" x2="3.01" y2="6"/>
+                            <line x1="3" y1="12" x2="3.01" y2="12"/>
+                            <line x1="3" y1="18" x2="3.01" y2="18"/>
+                        </svg>
+                        Max Results
+                    </label>
+                    <select id="maxResults">
+                        <option value="5">5 Results</option>
+                        <option value="10" selected>10 Results</option>
+                        <option value="15">15 Results</option>
+                        <option value="20">20 Results</option>
+                    </select>
+                </div>
+
+                <div class="form-field">
+                    <label for="currency">
+                        <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"/>
+                            <path d="M12 6v12M15 9H9.5a2.5 2.5 0 000 5H14.5a2.5 2.5 0 010 5H9"/>
+                        </svg>
+                        Currency
+                    </label>
+                    <select id="currency">
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                        <option value="GBP">GBP (£)</option>
+                        <option value="JPY">JPY (¥)</option>
+                        <option value="CAD">CAD ($)</option>
+                        <option value="AUD">AUD ($)</option>
+                        <option value="MXN" selected>MXN ($)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="search-actions">
+                <button class="btn-primary" id="searchBtn" onclick="searchFlights()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="M21 21l-4.35-4.35"/>
+                    </svg>
+                    <span>Search Flights</span>
+                </button>
+                <button class="btn-secondary" onclick="clearSearch()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    <span>Clear</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="statsSection" style="display: none;">
+            <div class="stats-grid">
+                <div class="stat-card glass">
+                    <div class="stat-value" id="statLowest">-</div>
+                    <div class="stat-label">Lowest Price</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-value" id="statAverage">-</div>
+                    <div class="stat-label">Average Price</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-value" id="statFastest">-</div>
+                    <div class="stat-label">Fastest Flight</div>
+                </div>
+                <div class="stat-card glass">
+                    <div class="stat-value" id="statDirect">-</div>
+                    <div class="stat-label">Direct Flights</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="sortSection" style="display: none;" class="sort-section">
+            <div class="results-info" id="resultsInfo"></div>
+            <div class="sort-buttons">
+                <button class="btn-sort active" onclick="sortResults('price')">Cheapest</button>
+                <button class="btn-sort" onclick="sortResults('duration')">Fastest</button>
+                <button class="btn-sort" onclick="sortResults('stops')">Fewest Stops</button>
+                <button class="btn-sort" onclick="sortResults('departure')">Earliest Departure</button>
+                <button class="btn-sort" onclick="sortResults('arrival')">Earliest Arrival</button>
+            </div>
+        </div>
+
+        <div id="error" class="error" style="display: none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span id="errorMessage"></span>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <div class="loading-text">Searching for the best flight deals...</div>
+            <div style="margin-top: 12px; opacity: 0.75; font-size: 0.9em;">This may take a few seconds</div>
+        </div>
+
+        <div id="results"></div>
+    </div>
+
+    <script>
+        let accessToken = null;
+        let tokenExpiry = null;
+        let flightOffers = [];
+        let currentSort = 'price';
+        let tripType = 'one-way';
+        let selectedOrigin = null;
+        let selectedDestination = null;
+        let allAirports = [];
+        let isLoadingAirports = false;
+
+        const API_KEY = 'mPYrgCttRBEG6yUuDSXvrZ5SIzpbn0qe';
+        const API_SECRET = 'zqPI9MdGbeG5hBuW';
+        const BASE_URL = 'https://test.api.amadeus.com';
+
+        // Set minimum date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('departure').min = today;
+        document.getElementById('returnDate').min = today;
+
+        // Update return date minimum when departure changes
+        document.getElementById('departure').addEventListener('change', (e) => {
+            document.getElementById('returnDate').min = e.target.value;
+        });
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select-wrapper')) {
+                document.querySelectorAll('.dropdown-list').forEach(dd => {
+                    dd.classList.remove('show');
+                    const input = dd.previousElementSibling;
+                    if (input) input.classList.remove('open');
+                });
+            }
+        });
+
+        // Load popular airports on page load
+        window.addEventListener('load', async () => {
+            await loadPopularAirports();
+        });
+
+        async function loadPopularAirports() {
+            if (isLoadingAirports || allAirports.length > 0) return;
+            
+            isLoadingAirports = true;
+            try {
+                const token = await getAccessToken();
+                
+                // Load multiple popular cities
+                const cities = ['New York', 'Los Angeles', 'London', 'Paris', 'Tokyo', 'Dubai', 
+                               'Singapore', 'Hong Kong', 'Sydney', 'Toronto', 'Mexico City', 
+                               'Chicago', 'San Francisco', 'Miami', 'Seattle', 'Boston',
+                               'Las Vegas', 'Orlando', 'Madrid', 'Barcelona', 'Rome',
+                               'Amsterdam', 'Frankfurt', 'Munich', 'Zurich', 'Vienna',
+                               'Bangkok', 'Seoul', 'Shanghai', 'Beijing', 'Delhi'];
+                
+                const promises = cities.map(city => 
+                    fetch(`${BASE_URL}/v1/reference-data/locations?subType=AIRPORT,CITY&keyword=${encodeURIComponent(city)}&page[limit]=5`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    }).then(r => r.ok ? r.json() : null)
+                );
+
+                const results = await Promise.all(promises);
+                const airports = results.flatMap(r => r?.data || []);
+                
+                // Remove duplicates based on IATA code
+                const uniqueAirports = Array.from(new Map(airports.map(a => [a.iataCode, a])).values());
+                
+                allAirports = uniqueAirports.sort((a, b) => {
+                    const cityA = a.address?.cityName || '';
+                    const cityB = b.address?.cityName || '';
+                    return cityA.localeCompare(cityB);
+                });
+
+            } catch (error) {
+                console.error('Error loading airports:', error);
+            }
+            isLoadingAirports = false;
+        }
+
+        function showDropdown(fieldType) {
+            const input = document.getElementById(fieldType);
+            const dropdown = document.getElementById(`${fieldType}Dropdown`);
+            
+            // Make input editable when clicked
+            input.removeAttribute('readonly');
+            input.select();
+            
+            input.classList.add('open');
+            displayAirportList(allAirports, fieldType);
+            dropdown.classList.add('show');
+        }
+
+        function filterAirports(fieldType) {
+            const input = document.getElementById(fieldType);
+            const searchText = input.value.toLowerCase().trim();
+            
+            if (!searchText) {
+                displayAirportList(allAirports, fieldType);
+                return;
+            }
+
+            const filtered = allAirports.filter(airport => {
+                const city = (airport.address?.cityName || '').toLowerCase();
+                const country = (airport.address?.countryName || '').toLowerCase();
+                const name = (airport.name || '').toLowerCase();
+                const code = (airport.iataCode || '').toLowerCase();
+                
+                return city.includes(searchText) || 
+                       country.includes(searchText) || 
+                       name.includes(searchText) ||
+                       code.includes(searchText);
+            });
+
+            displayAirportList(filtered, fieldType);
+        }
+
+        function displayAirportList(airports, fieldType) {
+            const dropdown = document.getElementById(`${fieldType}Dropdown`);
+            
+            if (airports.length === 0) {
+                dropdown.innerHTML = '<div class="dropdown-no-results">No airports found</div>';
+                dropdown.classList.add('show');
+                return;
+            }
+
+            const selectedCode = fieldType === 'origin' ? selectedOrigin?.iataCode : selectedDestination?.iataCode;
+
+            dropdown.innerHTML = airports.slice(0, 50).map(airport => {
+                const cityName = airport.address?.cityName || '';
+                const countryName = airport.address?.countryName || '';
+                const airportName = airport.name || '';
+                const iataCode = airport.iataCode;
+                const isSelected = iataCode === selectedCode;
+
+                return `
+                    <div class="dropdown-item ${isSelected ? 'selected' : ''}" 
+                         onclick="selectAirport('${iataCode}', '${cityName.replace(/'/g, "\\'")}', '${airportName.replace(/'/g, "\\'")}', '${countryName.replace(/'/g, "\\'")}', '${fieldType}')">
+                        <div class="dropdown-item-main">
+                            <div class="dropdown-item-city">${cityName}</div>
+                            <div class="dropdown-item-airport">${airportName}${countryName ? `, ${countryName}` : ''}</div>
+                        </div>
+                        <div class="dropdown-item-code">${iataCode}</div>
+                    </div>
+                `;
+            }).join('');
+
+            dropdown.classList.add('show');
+        }
+
+        function selectAirport(iataCode, cityName, airportName, countryName, fieldType) {
+            const airport = {
+                iataCode,
+                cityName,
+                airportName,
+                countryName
+            };
+
+            if (fieldType === 'origin') {
+                selectedOrigin = airport;
+                document.getElementById('origin').value = `${cityName} (${iataCode})`;
+            } else {
+                selectedDestination = airport;
+                document.getElementById('destination').value = `${cityName} (${iataCode})`;
+            }
+
+            // Close dropdown
+            const dropdown = document.getElementById(`${fieldType}Dropdown`);
+            const input = document.getElementById(fieldType);
+            dropdown.classList.remove('show');
+            input.classList.remove('open');
+            input.setAttribute('readonly', '');
+        }
+
+        function setTripType(type) {
+            tripType = type;
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            event.target.closest('.tab').classList.add('active');
+            
+            const returnField = document.getElementById('returnDateField');
+            returnField.style.display = type === 'round-trip' ? 'block' : 'none';
+            
+            if (type === 'one-way') {
+                document.getElementById('returnDate').value = '';
+            }
+        }
+
+        function clearSearch() {
+            document.getElementById('origin').value = '';
+            document.getElementById('destination').value = '';
+            document.getElementById('departure').value = '';
+            document.getElementById('returnDate').value = '';
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('sortSection').style.display = 'none';
+            document.getElementById('statsSection').style.display = 'none';
+            selectedOrigin = null;
+            selectedDestination = null;
+            hideError();
+        }
+
+        async function getAccessToken() {
+            if (accessToken && tokenExpiry && Date.now() < tokenExpiry) {
+                return accessToken;
+            }
+
+            try {
+                const response = await fetch(`${BASE_URL}/v1/security/oauth2/token`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: `grant_type=client_credentials&client_id=${API_KEY}&client_secret=${API_SECRET}`
+                });
+
+                if (!response.ok) {
+                    throw new Error('Authentication failed');
+                }
+
+                const data = await response.json();
+                accessToken = data.access_token;
+                tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000;
+                return accessToken;
+            } catch (error) {
+                throw new Error('Failed to authenticate with Amadeus API');
+            }
+        }
+
+        async function searchFlights() {
+            if (!selectedOrigin) {
+                showError('Please select an origin airport from the dropdown');
+                return;
+            }
+
+            if (!selectedDestination) {
+                showError('Please select a destination airport from the dropdown');
+                return;
+            }
+
+            const departure = document.getElementById('departure').value;
+            const returnDate = document.getElementById('returnDate').value;
+            const adults = document.getElementById('adults').value;
+            const travelClass = document.getElementById('travelClass').value;
+            const maxResults = document.getElementById('maxResults').value;
+            const currency = document.getElementById('currency').value;
+
+            if (!departure) {
+                showError('Please select a departure date');
+                return;
+            }
+
+            if (selectedOrigin.iataCode === selectedDestination.iataCode) {
+                showError('Origin and destination must be different');
+                return;
+            }
+
+            if (tripType === 'round-trip' && !returnDate) {
+                showError('Please select a return date for round trip');
+                return;
+            }
+
+            if (returnDate && returnDate < departure) {
+                showError('Return date must be after departure date');
+                return;
+            }
+
+            hideError();
+            showLoading();
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('sortSection').style.display = 'none';
+            document.getElementById('statsSection').style.display = 'none';
+
+            try {
+                const token = await getAccessToken();
+                
+                const params = new URLSearchParams({
+                    originLocationCode: selectedOrigin.iataCode,
+                    destinationLocationCode: selectedDestination.iataCode,
+                    departureDate: departure,
+                    adults: adults,
+                    max: maxResults,
+                    currencyCode: currency,
+                    travelClass: travelClass
+                });
+
+                if (returnDate) {
+                    params.append('returnDate', returnDate);
+                }
+
+                const response = await fetch(`${BASE_URL}/v2/shopping/flight-offers?${params}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.errors?.[0]?.detail || 'Failed to fetch flights');
+                }
+
+                const data = await response.json();
+                flightOffers = data.data || [];
+                
+                hideLoading();
+                
+                if (flightOffers.length === 0) {
+                    showNoResults();
+                } else {
+                    document.getElementById('sortSection').style.display = 'flex';
+                    document.getElementById('statsSection').style.display = 'block';
+                    currentSort = 'price';
+                    updateSortButtons();
+                    updateStatistics();
+                    displayResults();
+                }
+            } catch (error) {
+                hideLoading();
+                showError(error.message);
+            }
+        }
+
+        function updateStatistics() {
+            const prices = flightOffers.map(offer => parseFloat(offer.price.total));
+            const lowest = Math.min(...prices);
+            const average = prices.reduce((a, b) => a + b, 0) / prices.length;
+            const directFlights = flightOffers.filter(offer => 
+                offer.itineraries[0].segments.length === 1
+            ).length;
+            
+            let fastestDuration = Infinity;
+            flightOffers.forEach(offer => {
+                const duration = getTotalDuration(offer);
+                if (duration < fastestDuration) fastestDuration = duration;
+            });
+
+            const currency = flightOffers[0].price.currency;
+            const currencySymbol = getCurrencySymbol(currency);
+            document.getElementById('statLowest').textContent = `${currencySymbol}${lowest.toFixed(2)}`;
+            document.getElementById('statAverage').textContent = `${currencySymbol}${average.toFixed(2)}`;
+            document.getElementById('statFastest').textContent = formatDuration(`PT${fastestDuration}M`);
+            document.getElementById('statDirect').textContent = directFlights;
+        }
+
+        function getCurrencySymbol(currency) {
+            const symbols = {
+                'USD': '$',
+                'EUR': '€',
+                'GBP': '£',
+                'JPY': '¥',
+                'CAD': '$',
+                'AUD': '$',
+                'MXN': '$'
+            };
+            return symbols[currency] || currency + ' ';
+        }
+
+        function sortResults(sortBy) {
+            currentSort = sortBy;
+            updateSortButtons();
+            displayResults();
+        }
+
+        function updateSortButtons() {
+            document.querySelectorAll('.btn-sort').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelectorAll('.btn-sort').forEach(btn => {
+                const text = btn.textContent.toLowerCase();
+                if ((currentSort === 'price' && text.includes('cheapest')) ||
+                    (currentSort === 'duration' && text.includes('fastest')) ||
+                    (currentSort === 'stops' && text.includes('fewest')) ||
+                    (currentSort === 'departure' && text.includes('earliest departure')) ||
+                    (currentSort === 'arrival' && text.includes('earliest arrival'))) {
+                    btn.classList.add('active');
+                }
+            });
+        }
+
+        function displayResults() {
+            const sorted = [...flightOffers].sort((a, b) => {
+                if (currentSort === 'price') {
+                    return parseFloat(a.price.total) - parseFloat(b.price.total);
+                } else if (currentSort === 'duration') {
+                    return getTotalDuration(a) - getTotalDuration(b);
+                } else if (currentSort === 'stops') {
+                    return getStopCount(a) - getStopCount(b);
+                } else if (currentSort === 'departure') {
+                    return new Date(a.itineraries[0].segments[0].departure.at) - 
+                           new Date(b.itineraries[0].segments[0].departure.at);
+                } else if (currentSort === 'arrival') {
+                    const aItinerary = a.itineraries[0];
+                    const bItinerary = b.itineraries[0];
+                    return new Date(aItinerary.segments[aItinerary.segments.length - 1].arrival.at) -
+                           new Date(bItinerary.segments[bItinerary.segments.length - 1].arrival.at);
+                }
+            });
+
+            const adults = parseInt(document.getElementById('adults').value);
+            document.getElementById('resultsInfo').textContent = 
+                `Found ${sorted.length} flight${sorted.length !== 1 ? 's' : ''} for ${adults} adult${adults !== 1 ? 's' : ''}`;
+
+            const resultsHtml = sorted.map((offer, index) => createFlightCard(offer, index === 0, adults)).join('');
+            document.getElementById('results').innerHTML = resultsHtml;
+        }
+
+        function createFlightCard(offer, isBest, adults) {
+            const itinerary = offer.itineraries[0];
+            const segments = itinerary.segments;
+            const price = parseFloat(offer.price.total);
+            const currency = offer.price.currency;
+            const currencySymbol = getCurrencySymbol(currency);
+            const duration = formatDuration(itinerary.duration);
+            const stops = segments.length - 1;
+            const pricePerPerson = (price / adults).toFixed(2);
+
+            const firstSegment = segments[0];
+            const lastSegment = segments[segments.length - 1];
+
+            let card = `
+                <div class="flight-card glass ${isBest ? 'best-deal' : ''}">
+                    ${isBest ? '<div class="best-deal-badge">BEST DEAL</div>' : ''}
+                    
+                    <div class="flight-header">
+                        <div class="price-section">
+                            <div class="price">${currencySymbol}${price.toFixed(2)}</div>
+                            ${adults > 1 ? `<div class="price-per-person">${currencySymbol}${pricePerPerson} per person</div>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="flight-info-grid">
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <polyline points="12 6 12 12 16 14"/>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <div class="info-label">Duration</div>
+                                <div class="info-value">${duration}</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <line x1="12" y1="8" x2="12" y2="16"/>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <div class="info-label">Stops</div>
+                                <div class="info-value">${stops === 0 ? 'Direct' : `${stops} stop${stops > 1 ? 's' : ''}`}</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <div class="info-label">Departure</div>
+                                <div class="info-value">${formatTime(firstSegment.departure.at)}</div>
+                            </div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-icon">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/>
+                                    <line x1="4" y1="22" x2="4" y2="15"/>
+                                </svg>
+                            </div>
+                            <div class="info-content">
+                                <div class="info-label">Arrival</div>
+                                <div class="info-value">${formatTime(lastSegment.arrival.at)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="journey-timeline">
+            `;
+
+            segments.forEach((segment, index) => {
+                card += `
+                    <div class="segment">
+                        <div class="segment-header">
+                            <div class="airline-info">
+                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"/>
+                                </svg>
+                                ${getAirlineName(segment.carrierCode)} ${segment.carrierCode}${segment.number}
+                            </div>
+                            <div class="segment-duration">
+                                ${formatDuration(segment.duration)}
+                            </div>
+                        </div>
+                        
+                        <div class="route-display">
+                            <div class="airport-info">
+                                <div class="airport-code">${segment.departure.iataCode}</div>
+                                <div class="airport-time">${formatTime(segment.departure.at)}</div>
+                                <div class="airport-date">${formatDate(segment.departure.at)}</div>
+                            </div>
+                            <div class="route-arrow">→</div>
+                            <div class="airport-info">
+                                <div class="airport-code">${segment.arrival.iataCode}</div>
+                                <div class="airport-time">${formatTime(segment.arrival.at)}</div>
+                                <div class="airport-date">${formatDate(segment.arrival.at)}</div>
+                            </div>
+                        </div>
+                        
+                        <div class="segment-details">
+                            <div>Aircraft: ${segment.aircraft?.code || 'N/A'}</div>
+                        </div>
+                    </div>
+                `;
+
+                if (index < segments.length - 1) {
+                    const layoverTime = calculateLayover(segment.arrival.at, segments[index + 1].departure.at);
+                    card += `
+                        <div class="layover">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"/>
+                                <polyline points="12 6 12 12 16 14"/>
+                            </svg>
+                            <span>Layover: ${layoverTime} at ${segment.arrival.iataCode}</span>
+                        </div>
+                    `;
+                }
+            });
+
+            card += `
+                    </div>
+                </div>
+            `;
+            return card;
+        }
+
+        function getAirlineName(code) {
+            const airlines = {
+                'AA': 'American Airlines',
+                'UA': 'United Airlines',
+                'DL': 'Delta Air Lines',
+                'BA': 'British Airways',
+                'AF': 'Air France',
+                'LH': 'Lufthansa',
+                'EK': 'Emirates',
+                'QR': 'Qatar Airways',
+                'SQ': 'Singapore Airlines',
+                'CX': 'Cathay Pacific',
+                'AM': 'Aeroméxico',
+                'VB': 'VivaAerobus',
+                'Y4': 'Volaris'
+            };
+            return airlines[code] || code;
+        }
+
+        function formatDuration(duration) {
+            const match = duration.match(/PT(\d+H)?(\d+M)?/);
+            if (!match) return duration;
+            
+            const hours = match[1] ? parseInt(match[1]) : 0;
+            const minutes = match[2] ? parseInt(match[2]) : 0;
+            
+            if (hours && minutes) return `${hours}h ${minutes}m`;
+            if (hours) return `${hours}h`;
+            if (minutes) return `${minutes}m`;
+            return duration;
+        }
+
+        function formatTime(datetime) {
+            const date = new Date(datetime);
+            return date.toLocaleTimeString('en-US', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: true 
+            });
+        }
+
+        function formatDate(datetime) {
+            const date = new Date(datetime);
+            return date.toLocaleDateString('en-US', { 
+                month: 'short', 
+                day: 'numeric',
+                year: 'numeric'
+            });
+        }
+
+        function calculateLayover(arrival, departure) {
+            const arrivalTime = new Date(arrival);
+            const departureTime = new Date(departure);
+            const diff = departureTime - arrivalTime;
+            const hours = Math.floor(diff / 3600000);
+            const minutes = Math.floor((diff % 3600000) / 60000);
+            return `${hours}h ${minutes}m`;
+        }
+
+        function getTotalDuration(offer) {
+            const duration = offer.itineraries[0].duration;
+            const match = duration.match(/PT(\d+H)?(\d+M)?/);
+            const hours = match[1] ? parseInt(match[1]) : 0;
+            const minutes = match[2] ? parseInt(match[2]) : 0;
+            return hours * 60 + minutes;
+        }
+
+        function getStopCount(offer) {
+            return offer.itineraries[0].segments.length - 1;
+        }
+
+        function showLoading() {
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('searchBtn').disabled = true;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('searchBtn').disabled = false;
+        }
+
+        function showError(message) {
+            document.getElementById('errorMessage').textContent = message;
+            document.getElementById('error').style.display = 'flex';
+            setTimeout(() => hideError(), 8000);
+        }
+
+        function hideError() {
+            document.getElementById('error').style.display = 'none';
+        }
+
+        function showNoResults() {
+            document.getElementById('results').innerHTML = `
+                <div class="no-results glass" style="border-radius: 20px; padding: 80px 40px;">
+                    <h3>No flights found</h3>
+                    <p>Try adjusting your search criteria or selecting different dates.</p>
+                    <p style="margin-top: 16px; opacity: 0.75;">Consider checking nearby airports or being flexible with your travel dates.</p>
+                </div>
+            `;
+        }
+
+        // Allow Enter key to search
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !document.getElementById('searchBtn').disabled) {
+                const activeElement = document.activeElement;
+                if (activeElement.id !== 'origin' && activeElement.id !== 'destination') {
+                    searchFlights();
+                }
+            }
+        });
+    </script>
 </body>
 </html>
