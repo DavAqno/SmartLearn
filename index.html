@@ -763,7 +763,7 @@
                     <input type="text" 
                            id="origin" 
                            class="custom-select-input"
-                           placeholder="Select or type city name..." 
+                           placeholder="Selecciona ciudad..." 
                            autocomplete="off"
                            oninput="filterAirports('origin')"
                            onfocus="showDropdown('origin')"
@@ -782,7 +782,7 @@
                     <input type="text" 
                            id="destination" 
                            class="custom-select-input"
-                           placeholder="Select or type city name..." 
+                           placeholder="Selecciona ciudad..." 
                            autocomplete="off"
                            oninput="filterAirports('destination')"
                            onfocus="showDropdown('destination')"
@@ -967,12 +967,82 @@
         let tripType = 'one-way';
         let selectedOrigin = null;
         let selectedDestination = null;
-        let allAirports = [];
-        let isLoadingAirports = false;
 
+        // ⚙️ CONFIGURA TUS CREDENCIALES DE AMADEUS API AQUÍ
         const API_KEY = 'mPYrgCttRBEG6yUuDSXvrZ5SIzpbn0qe';
         const API_SECRET = 'oVzi4BfEnHY0N4G9';
         const BASE_URL = 'https://test.api.amadeus.com';
+
+        // Lista estática de aeropuertos principales (evita 429 rate limit)
+        const AIRPORTS = [
+            // Estados Unidos
+            { city: 'New York', code: 'JFK', name: 'John F. Kennedy International', country: 'USA' },
+            { city: 'New York', code: 'LGA', name: 'LaGuardia Airport', country: 'USA' },
+            { city: 'New York', code: 'EWR', name: 'Newark Liberty International', country: 'USA' },
+            { city: 'Los Angeles', code: 'LAX', name: 'Los Angeles International', country: 'USA' },
+            { city: 'Chicago', code: 'ORD', name: "O'Hare International", country: 'USA' },
+            { city: 'Miami', code: 'MIA', name: 'Miami International', country: 'USA' },
+            { city: 'San Francisco', code: 'SFO', name: 'San Francisco International', country: 'USA' },
+            { city: 'Las Vegas', code: 'LAS', name: 'Harry Reid International', country: 'USA' },
+            { city: 'Seattle', code: 'SEA', name: 'Seattle-Tacoma International', country: 'USA' },
+            { city: 'Boston', code: 'BOS', name: 'Logan International', country: 'USA' },
+            { city: 'Orlando', code: 'MCO', name: 'Orlando International', country: 'USA' },
+            { city: 'Atlanta', code: 'ATL', name: 'Hartsfield-Jackson Atlanta International', country: 'USA' },
+            { city: 'Dallas', code: 'DFW', name: 'Dallas/Fort Worth International', country: 'USA' },
+            { city: 'Houston', code: 'IAH', name: 'George Bush Intercontinental', country: 'USA' },
+            { city: 'Phoenix', code: 'PHX', name: 'Phoenix Sky Harbor International', country: 'USA' },
+            
+            // México
+            { city: 'Mexico City', code: 'MEX', name: 'Mexico City International', country: 'Mexico' },
+            { city: 'Cancún', code: 'CUN', name: 'Cancún International', country: 'Mexico' },
+            { city: 'Guadalajara', code: 'GDL', name: 'Miguel Hidalgo y Costilla International', country: 'Mexico' },
+            { city: 'Monterrey', code: 'MTY', name: 'General Mariano Escobedo International', country: 'Mexico' },
+            { city: 'Tijuana', code: 'TIJ', name: 'General Abelardo L. Rodríguez International', country: 'Mexico' },
+            { city: 'Los Cabos', code: 'SJD', name: 'Los Cabos International', country: 'Mexico' },
+            { city: 'Puerto Vallarta', code: 'PVR', name: 'Licenciado Gustavo Díaz Ordaz International', country: 'Mexico' },
+            
+            // Europa
+            { city: 'London', code: 'LHR', name: 'Heathrow Airport', country: 'UK' },
+            { city: 'London', code: 'LGW', name: 'Gatwick Airport', country: 'UK' },
+            { city: 'Paris', code: 'CDG', name: 'Charles de Gaulle', country: 'France' },
+            { city: 'Paris', code: 'ORY', name: 'Orly Airport', country: 'France' },
+            { city: 'Madrid', code: 'MAD', name: 'Adolfo Suárez Madrid-Barajas', country: 'Spain' },
+            { city: 'Barcelona', code: 'BCN', name: 'Barcelona-El Prat', country: 'Spain' },
+            { city: 'Rome', code: 'FCO', name: 'Leonardo da Vinci-Fiumicino', country: 'Italy' },
+            { city: 'Amsterdam', code: 'AMS', name: 'Amsterdam Airport Schiphol', country: 'Netherlands' },
+            { city: 'Frankfurt', code: 'FRA', name: 'Frankfurt Airport', country: 'Germany' },
+            { city: 'Munich', code: 'MUC', name: 'Munich Airport', country: 'Germany' },
+            { city: 'Zurich', code: 'ZRH', name: 'Zurich Airport', country: 'Switzerland' },
+            { city: 'Vienna', code: 'VIE', name: 'Vienna International Airport', country: 'Austria' },
+            
+            // Asia
+            { city: 'Tokyo', code: 'NRT', name: 'Narita International', country: 'Japan' },
+            { city: 'Tokyo', code: 'HND', name: 'Haneda Airport', country: 'Japan' },
+            { city: 'Singapore', code: 'SIN', name: 'Singapore Changi Airport', country: 'Singapore' },
+            { city: 'Hong Kong', code: 'HKG', name: 'Hong Kong International', country: 'Hong Kong' },
+            { city: 'Dubai', code: 'DXB', name: 'Dubai International', country: 'UAE' },
+            { city: 'Seoul', code: 'ICN', name: 'Incheon International', country: 'South Korea' },
+            { city: 'Bangkok', code: 'BKK', name: 'Suvarnabhumi Airport', country: 'Thailand' },
+            { city: 'Shanghai', code: 'PVG', name: 'Pudong International', country: 'China' },
+            { city: 'Beijing', code: 'PEK', name: 'Beijing Capital International', country: 'China' },
+            { city: 'Delhi', code: 'DEL', name: 'Indira Gandhi International', country: 'India' },
+            
+            // Oceanía
+            { city: 'Sydney', code: 'SYD', name: 'Sydney Kingsford Smith', country: 'Australia' },
+            { city: 'Melbourne', code: 'MEL', name: 'Melbourne Airport', country: 'Australia' },
+            { city: 'Auckland', code: 'AKL', name: 'Auckland Airport', country: 'New Zealand' },
+            
+            // Canadá
+            { city: 'Toronto', code: 'YYZ', name: 'Toronto Pearson International', country: 'Canada' },
+            { city: 'Vancouver', code: 'YVR', name: 'Vancouver International', country: 'Canada' },
+            { city: 'Montreal', code: 'YUL', name: 'Montréal-Pierre Elliott Trudeau International', country: 'Canada' },
+            
+            // Sudamérica
+            { city: 'São Paulo', code: 'GRU', name: 'São Paulo-Guarulhos International', country: 'Brazil' },
+            { city: 'Buenos Aires', code: 'EZE', name: 'Ministro Pistarini International', country: 'Argentina' },
+            { city: 'Lima', code: 'LIM', name: 'Jorge Chávez International', country: 'Peru' },
+            { city: 'Bogotá', code: 'BOG', name: 'El Dorado International', country: 'Colombia' },
+        ];
 
         // Set minimum date to today
         const today = new Date().toISOString().split('T')[0];
@@ -995,60 +1065,14 @@
             }
         });
 
-        // Load popular airports on page load
-        window.addEventListener('load', async () => {
-            await loadPopularAirports();
-        });
-
-        async function loadPopularAirports() {
-            if (isLoadingAirports || allAirports.length > 0) return;
-            
-            isLoadingAirports = true;
-            try {
-                const token = await getAccessToken();
-                
-                // Load multiple popular cities
-                const cities = ['New York', 'Los Angeles', 'London', 'Paris', 'Tokyo', 'Dubai', 
-                               'Singapore', 'Hong Kong', 'Sydney', 'Toronto', 'Mexico City', 
-                               'Chicago', 'San Francisco', 'Miami', 'Seattle', 'Boston',
-                               'Las Vegas', 'Orlando', 'Madrid', 'Barcelona', 'Rome',
-                               'Amsterdam', 'Frankfurt', 'Munich', 'Zurich', 'Vienna',
-                               'Bangkok', 'Seoul', 'Shanghai', 'Beijing', 'Delhi'];
-                
-                const promises = cities.map(city => 
-                    fetch(`${BASE_URL}/v1/reference-data/locations?subType=AIRPORT,CITY&keyword=${encodeURIComponent(city)}&page[limit]=5`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    }).then(r => r.ok ? r.json() : null)
-                );
-
-                const results = await Promise.all(promises);
-                const airports = results.flatMap(r => r?.data || []);
-                
-                // Remove duplicates based on IATA code
-                const uniqueAirports = Array.from(new Map(airports.map(a => [a.iataCode, a])).values());
-                
-                allAirports = uniqueAirports.sort((a, b) => {
-                    const cityA = a.address?.cityName || '';
-                    const cityB = b.address?.cityName || '';
-                    return cityA.localeCompare(cityB);
-                });
-
-            } catch (error) {
-                console.error('Error loading airports:', error);
-            }
-            isLoadingAirports = false;
-        }
-
         function showDropdown(fieldType) {
             const input = document.getElementById(fieldType);
             const dropdown = document.getElementById(`${fieldType}Dropdown`);
             
-            // Make input editable when clicked
             input.removeAttribute('readonly');
             input.select();
-            
             input.classList.add('open');
-            displayAirportList(allAirports, fieldType);
+            displayAirportList(AIRPORTS, fieldType);
             dropdown.classList.add('show');
         }
 
@@ -1057,15 +1081,15 @@
             const searchText = input.value.toLowerCase().trim();
             
             if (!searchText) {
-                displayAirportList(allAirports, fieldType);
+                displayAirportList(AIRPORTS, fieldType);
                 return;
             }
 
-            const filtered = allAirports.filter(airport => {
-                const city = (airport.address?.cityName || '').toLowerCase();
-                const country = (airport.address?.countryName || '').toLowerCase();
-                const name = (airport.name || '').toLowerCase();
-                const code = (airport.iataCode || '').toLowerCase();
+            const filtered = AIRPORTS.filter(airport => {
+                const city = airport.city.toLowerCase();
+                const country = airport.country.toLowerCase();
+                const name = airport.name.toLowerCase();
+                const code = airport.code.toLowerCase();
                 
                 return city.includes(searchText) || 
                        country.includes(searchText) || 
@@ -1080,28 +1104,24 @@
             const dropdown = document.getElementById(`${fieldType}Dropdown`);
             
             if (airports.length === 0) {
-                dropdown.innerHTML = '<div class="dropdown-no-results">No airports found</div>';
+                dropdown.innerHTML = '<div class="dropdown-no-results">No se encontraron aeropuertos</div>';
                 dropdown.classList.add('show');
                 return;
             }
 
-            const selectedCode = fieldType === 'origin' ? selectedOrigin?.iataCode : selectedDestination?.iataCode;
+            const selectedCode = fieldType === 'origin' ? selectedOrigin?.code : selectedDestination?.code;
 
-            dropdown.innerHTML = airports.slice(0, 50).map(airport => {
-                const cityName = airport.address?.cityName || '';
-                const countryName = airport.address?.countryName || '';
-                const airportName = airport.name || '';
-                const iataCode = airport.iataCode;
-                const isSelected = iataCode === selectedCode;
+            dropdown.innerHTML = airports.map(airport => {
+                const isSelected = airport.code === selectedCode;
 
                 return `
                     <div class="dropdown-item ${isSelected ? 'selected' : ''}" 
-                         onclick="selectAirport('${iataCode}', '${cityName.replace(/'/g, "\\'")}', '${airportName.replace(/'/g, "\\'")}', '${countryName.replace(/'/g, "\\'")}', '${fieldType}')">
+                         onclick="selectAirport('${airport.code}', '${airport.city}', '${airport.name}', '${airport.country}', '${fieldType}')">
                         <div class="dropdown-item-main">
-                            <div class="dropdown-item-city">${cityName}</div>
-                            <div class="dropdown-item-airport">${airportName}${countryName ? `, ${countryName}` : ''}</div>
+                            <div class="dropdown-item-city">${airport.city}</div>
+                            <div class="dropdown-item-airport">${airport.name}, ${airport.country}</div>
                         </div>
-                        <div class="dropdown-item-code">${iataCode}</div>
+                        <div class="dropdown-item-code">${airport.code}</div>
                     </div>
                 `;
             }).join('');
@@ -1109,23 +1129,17 @@
             dropdown.classList.add('show');
         }
 
-        function selectAirport(iataCode, cityName, airportName, countryName, fieldType) {
-            const airport = {
-                iataCode,
-                cityName,
-                airportName,
-                countryName
-            };
+        function selectAirport(code, city, name, country, fieldType) {
+            const airport = { code, city, name, country };
 
             if (fieldType === 'origin') {
                 selectedOrigin = airport;
-                document.getElementById('origin').value = `${cityName} (${iataCode})`;
+                document.getElementById('origin').value = `${city} (${code})`;
             } else {
                 selectedDestination = airport;
-                document.getElementById('destination').value = `${cityName} (${iataCode})`;
+                document.getElementById('destination').value = `${city} (${code})`;
             }
 
-            // Close dropdown
             const dropdown = document.getElementById(`${fieldType}Dropdown`);
             const input = document.getElementById(fieldType);
             dropdown.classList.remove('show');
@@ -1174,7 +1188,7 @@
                 });
 
                 if (!response.ok) {
-                    throw new Error('Authentication failed');
+                    throw new Error('Autenticación fallida. Verifica tus credenciales API.');
                 }
 
                 const data = await response.json();
@@ -1182,18 +1196,18 @@
                 tokenExpiry = Date.now() + (data.expires_in * 1000) - 60000;
                 return accessToken;
             } catch (error) {
-                throw new Error('Failed to authenticate with Amadeus API');
+                throw new Error('Error al autenticar con Amadeus API. Verifica tus credenciales.');
             }
         }
 
         async function searchFlights() {
             if (!selectedOrigin) {
-                showError('Please select an origin airport from the dropdown');
+                showError('Por favor selecciona un aeropuerto de origen del menú desplegable');
                 return;
             }
 
             if (!selectedDestination) {
-                showError('Please select a destination airport from the dropdown');
+                showError('Por favor selecciona un aeropuerto de destino del menú desplegable');
                 return;
             }
 
@@ -1205,22 +1219,22 @@
             const currency = document.getElementById('currency').value;
 
             if (!departure) {
-                showError('Please select a departure date');
+                showError('Por favor selecciona una fecha de salida');
                 return;
             }
 
-            if (selectedOrigin.iataCode === selectedDestination.iataCode) {
-                showError('Origin and destination must be different');
+            if (selectedOrigin.code === selectedDestination.code) {
+                showError('El origen y destino deben ser diferentes');
                 return;
             }
 
             if (tripType === 'round-trip' && !returnDate) {
-                showError('Please select a return date for round trip');
+                showError('Por favor selecciona una fecha de regreso para vuelo redondo');
                 return;
             }
 
             if (returnDate && returnDate < departure) {
-                showError('Return date must be after departure date');
+                showError('La fecha de regreso debe ser posterior a la fecha de salida');
                 return;
             }
 
@@ -1234,8 +1248,8 @@
                 const token = await getAccessToken();
                 
                 const params = new URLSearchParams({
-                    originLocationCode: selectedOrigin.iataCode,
-                    destinationLocationCode: selectedDestination.iataCode,
+                    originLocationCode: selectedOrigin.code,
+                    destinationLocationCode: selectedDestination.code,
                     departureDate: departure,
                     adults: adults,
                     max: maxResults,
@@ -1255,7 +1269,7 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
-                    throw new Error(errorData.errors?.[0]?.detail || 'Failed to fetch flights');
+                    throw new Error(errorData.errors?.[0]?.detail || 'Error al buscar vuelos');
                 }
 
                 const data = await response.json();
